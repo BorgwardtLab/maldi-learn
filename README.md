@@ -1,2 +1,2 @@
 # maldi-learn
-Software library for Maldi-Tof preprocessing and machine learning analysis.
+Software library for MALDI-TOF preprocessing and machine learning analysis.
