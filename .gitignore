@@ -1,0 +1,11 @@
+# Python cache
+__pycache__/
+
+# Pyenv files
+.python-version
+
+# Poetry
+# Poetry lock
+poetry.lock
+# Egg generated when running poetry install
+maldi_learn.egg-info/
