@@ -10,7 +10,7 @@ homepage = "https://github.com/BorgwardtLab/maldi-learn"
 [tool.poetry.dependencies]
 python = "^3.7"
 scikit-learn = "^0.22.1"
-topf = {git = "git@github.com:BorgwardtLab/Topf.git"}
+topf = {git = "ssh://git@github.com/BorgwardtLab/Topf.git"}
 [tool.poetry.dev-dependencies]
 pytest = "^3.0"
 
