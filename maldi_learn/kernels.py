@@ -64,6 +64,13 @@ class DiffusionKernel(StationaryKernelMixin, Kernel):
             distances = pdist(X / (4 * self.sigma), metric='sqeuclidean')
             pass
         else:
+
+            # Following the original API here, which prohibits gradient
+            # evaluation for this case.
+            if eval_gradient:
+                raise ValueError(
+                    'Gradient can only be evaluated when Y is None.')
+
             x_positions = np.array([x[0][0] for x in X]).reshape(-1, 1)
             y_positions = np.array([y[0][0] for y in Y]).reshape(-1, 1)
 
