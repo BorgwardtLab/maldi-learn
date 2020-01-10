@@ -87,8 +87,8 @@ class DiffusionKernel(StationaryKernelMixin, Kernel):
             x_peaks = np.array(x[:, 1])
             y_peaks = np.array(y[:, 1])
 
-            L = np.outer(x_peaks, y_peaks)
-            K = L * np.exp(-distances / (8 * self.sigma))
+            P = np.outer(x_peaks, y_peaks)
+            K = P * np.exp(-distances / (8 * self.sigma))
             K = np.sum(K)
 
             # TODO: add other scale factors here
@@ -111,8 +111,8 @@ class DiffusionKernel(StationaryKernelMixin, Kernel):
             x_peaks = np.array(x[:, 1])
             y_peaks = np.array(y[:, 1])
 
-            L = np.outer(x_peaks, y_peaks)
-            K = L * np.exp(-distances / (8 * self.sigma))
+            P = np.outer(x_peaks, y_peaks)
+            K = P * np.exp(-distances / (8 * self.sigma))
 
             # Thanks to the simple form of the kernel, the gradient only
             # requires an additional multiplication, followed by scaling
@@ -120,12 +120,14 @@ class DiffusionKernel(StationaryKernelMixin, Kernel):
             K_gradient = distances * K / (4 * self.sigma**2)
 
             # TODO: add other scale factors here
-            return -K_gradient
+            return -np.sum(K_gradient)
 
         if Y is None:
             if eval_gradient:
                 K = pairwise_kernels(X, metric=evaluate_kernel)
                 K_gradient = pairwise_kernels(X, metric=evaluate_gradient)
+
+                print(K_gradient.shape)
             else:
                 return pairwise_kernels(X, metric=evaluate_kernel)
         else:
