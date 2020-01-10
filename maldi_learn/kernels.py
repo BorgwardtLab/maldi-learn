@@ -7,11 +7,13 @@ from sklearn.gaussian_process.kernels import StationaryKernelMixin
 from sklearn.gaussian_process.kernels import Kernel
 
 from sklearn.metrics import pairwise_distances
+from sklearn.metrics import pairwise_kernels
 
 from scipy.spatial.distance import cdist
 from scipy.spatial.distance import pdist
 
 import numpy as np
+import sys
 
 
 class DiffusionKernel(StationaryKernelMixin, Kernel):
@@ -29,6 +31,14 @@ class DiffusionKernel(StationaryKernelMixin, Kernel):
         '''
 
         self.sigma = sigma
+
+        def passthrough(*args, **kwargs):
+            return args
+
+        module = sys.modules['sklearn.metrics.pairwise']
+        module.check_pairwise_arrays = passthrough
+
+        sys.modules['sklearn.metrics.pairwise'] = module
 
     @property
     def hyperparameter_sigma(self):
@@ -60,6 +70,30 @@ class DiffusionKernel(StationaryKernelMixin, Kernel):
             is True.
         '''
 
+        def evaluate_kernel(x, y):
+
+            x_positions = np.array(x[:, 0]).reshape(-1, 1)
+            y_positions = np.array(y[:, 0]).reshape(-1, 1)
+
+            distances = pairwise_distances(
+                x_positions,
+                y_positions,
+                metric='sqeuclidean'
+            )
+
+            # Calculate scale factors as the outer product of the peak
+            # heights of the input data.
+
+            x_peaks = np.array(x[:, 1])
+            y_peaks = np.array(y[:, 1])
+
+            L = np.outer(x_peaks, y_peaks)
+            K = L * np.exp(-distances / (8 * self.sigma))
+            K = np.sum(K)
+
+            # TODO: add other scale factors here
+            return -K
+
         if Y is None:
             distances = pdist(X / (4 * self.sigma), metric='sqeuclidean')
             pass
@@ -71,25 +105,7 @@ class DiffusionKernel(StationaryKernelMixin, Kernel):
                 raise ValueError(
                     'Gradient can only be evaluated when Y is None.')
 
-            x_positions = np.array([X[:, 0]]).reshape(-1, 1)
-            y_positions = np.array([Y[:, 0]]).reshape(-1, 1)
-
-            distances = pairwise_distances(
-                x_positions,
-                y_positions,
-                metric='sqeuclidean'
-            )
-
-            # Calculate scale factors as the outer product of the peak
-            # heights of the input data.
-
-            x_peaks = np.array([X[:, 1]])
-            y_peaks = np.array([Y[:, 1]])
-
-            L = np.outer(x_peaks, y_peaks)
-            K = L * np.exp(-distances / (8 * self.sigma))
-
-        return K
+            return pairwise_kernels(X, Y, metric=evaluate_kernel)
 
         #X = np.atleast_2d(X)
         #length_scale = _check_length_scale(X, self.length_scale)
