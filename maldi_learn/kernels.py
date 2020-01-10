@@ -6,6 +6,13 @@ from sklearn.gaussian_process.kernels import Hyperparameter
 from sklearn.gaussian_process.kernels import StationaryKernelMixin
 from sklearn.gaussian_process.kernels import Kernel
 
+from sklearn.metrics import pairwise_distances
+
+from scipy.spatial.distance import cdist
+from scipy.spatial.distance import pdist
+
+import numpy as np
+
 
 class DiffusionKernel(StationaryKernelMixin, Kernel):
     '''
@@ -54,7 +61,21 @@ class DiffusionKernel(StationaryKernelMixin, Kernel):
         '''
 
         if Y is None:
+            distances = pdist(X / (4 * self.sigma), metric='sqeuclidean')
             pass
+        else:
+            x_positions = np.array([x[0][0] for x in X]).reshape(-1, 1)
+            y_positions = np.array([y[0][0] for y in Y]).reshape(-1, 1)
+
+            distances = pairwise_distances(
+                x_positions,
+                y_positions,
+                metric='sqeuclidean'
+            )
+
+            K = np.exp(distances / (8 * self.sigma))
+
+        return K
 
         #X = np.atleast_2d(X)
         #length_scale = _check_length_scale(X, self.length_scale)
