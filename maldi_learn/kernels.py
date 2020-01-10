@@ -127,7 +127,8 @@ class DiffusionKernel(StationaryKernelMixin, Kernel):
                 K = pairwise_kernels(X, metric=evaluate_kernel)
                 K_gradient = pairwise_kernels(X, metric=evaluate_gradient)
 
-                print(K_gradient.shape)
+                return K, K_gradient[:, :, np.newaxis]
+
             else:
                 return pairwise_kernels(X, metric=evaluate_kernel)
         else:
