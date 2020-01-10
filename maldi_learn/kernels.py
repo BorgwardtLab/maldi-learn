@@ -94,9 +94,40 @@ class DiffusionKernel(StationaryKernelMixin, Kernel):
             # TODO: add other scale factors here
             return -K
 
+        def evaluate_gradient(x, y):
+
+            x_positions = np.array(x[:, 0]).reshape(-1, 1)
+            y_positions = np.array(y[:, 0]).reshape(-1, 1)
+
+            distances = pairwise_distances(
+                x_positions,
+                y_positions,
+                metric='sqeuclidean'
+            )
+
+            # Calculate scale factors as the outer product of the peak
+            # heights of the input data.
+
+            x_peaks = np.array(x[:, 1])
+            y_peaks = np.array(y[:, 1])
+
+            L = np.outer(x_peaks, y_peaks)
+            K = L * np.exp(-distances / (8 * self.sigma))
+
+            # Thanks to the simple form of the kernel, the gradient only
+            # requires an additional multiplication, followed by scaling
+            # it appropriately.
+            K_gradient = distances * K / (4 * self.sigma**2)
+
+            # TODO: add other scale factors here
+            return -K_gradient
+
         if Y is None:
-            distances = pdist(X / (4 * self.sigma), metric='sqeuclidean')
-            pass
+            if eval_gradient:
+                K = pairwise_kernels(X, metric=evaluate_kernel)
+                K_gradient = pairwise_kernels(X, metric=evaluate_gradient)
+            else:
+                return pairwise_kernels(X, metric=evaluate_kernel)
         else:
 
             # Following the original API here, which prohibits gradient
