@@ -103,7 +103,8 @@ class DiffusionKernel(StationaryKernelMixin, Kernel):
             K = np.sum(K)
 
             # TODO: add other scale factors here
-            return -K
+            # TODO: check sign
+            return K
 
         def evaluate_gradient(x, y):
 
@@ -131,7 +132,8 @@ class DiffusionKernel(StationaryKernelMixin, Kernel):
             K_gradient = distances * K / (4 * self.sigma**2)
 
             # TODO: add other scale factors here
-            return -np.sum(K_gradient)
+            # TODO: check sign
+            return np.sum(K_gradient)
 
         if Y is None:
             if eval_gradient:
