@@ -47,6 +47,15 @@ class DiffusionKernel(StationaryKernelMixin, Kernel):
     def hyperparameter_sigma(self):
         return Hyperparameter('sigma', 'numeric', self.sigma_bounds)
 
+    @property
+    def requires_vector_input(self):
+        '''
+        Returns whether the kernel works only on fixed-length feature
+        vectors.
+        '''
+
+        return False
+
     def __call__(self, X, Y=None, eval_gradient=False):
         '''
         Returns the kernel value k(X, Y) and, if desired, its gradient
@@ -74,7 +83,6 @@ class DiffusionKernel(StationaryKernelMixin, Kernel):
         '''
 
         def evaluate_kernel(x, y):
-
             x_positions = np.array(x[:, 0]).reshape(-1, 1)
             y_positions = np.array(y[:, 0]).reshape(-1, 1)
 
