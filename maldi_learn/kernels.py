@@ -22,15 +22,18 @@ class DiffusionKernel(StationaryKernelMixin, Kernel):
     a MALDI-TOF spectrum.
     '''
 
-    def __init__(self, sigma=1.0):
+    def __init__(self, sigma=1.0, sigma_bounds=(1e-5, 1e5)):
         '''
         Initialises a new instance of the kernel.
 
         Parameters:
             sigma: Smoothing parameter
+            sigma_bounds: Tuple specifying the minimum and maximum bound
+            of the sigma scale parameter.
         '''
 
         self.sigma = sigma
+        self.sigma_bounds = sigma_bounds
 
         def passthrough(*args, **kwargs):
             return args
@@ -42,7 +45,7 @@ class DiffusionKernel(StationaryKernelMixin, Kernel):
 
     @property
     def hyperparameter_sigma(self):
-        return Hyperparameter('sigma', 'numeric', self.sigma, 1)
+        return Hyperparameter('sigma', 'numeric', self.sigma_bounds)
 
     def __call__(self, X, Y=None, eval_gradient=False):
         '''
