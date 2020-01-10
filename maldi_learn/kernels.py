@@ -138,39 +138,6 @@ class DiffusionKernel(StationaryKernelMixin, Kernel):
 
             return pairwise_kernels(X, Y, metric=evaluate_kernel)
 
-        #X = np.atleast_2d(X)
-        #length_scale = _check_length_scale(X, self.length_scale)
-        #if Y is None:
-        #    dists = pdist(X / length_scale, metric='sqeuclidean')
-        #    K = np.exp(-.5 * dists)
-        #    # convert from upper-triangular matrix to square matrix
-        #    K = squareform(K)
-        #    np.fill_diagonal(K, 1)
-        #else:
-        #    if eval_gradient:
-        #        raise ValueError(
-        #            "Gradient can only be evaluated when Y is None.")
-        #    dists = cdist(X / length_scale, Y / length_scale,
-        #                  metric='sqeuclidean')
-        #    K = np.exp(-.5 * dists)
-
-        #if eval_gradient:
-        #    if self.hyperparameter_length_scale.fixed:
-        #        # Hyperparameter l kept fixed
-        #        return K, np.empty((X.shape[0], X.shape[0], 0))
-        #    elif not self.anisotropic or length_scale.shape[0] == 1:
-        #        K_gradient = \
-        #            (K * squareform(dists))[:, :, np.newaxis]
-        #        return K, K_gradient
-        #    elif self.anisotropic:
-        #        # We need to recompute the pairwise dimension-wise distances
-        #        K_gradient = (X[:, np.newaxis, :] - X[np.newaxis, :, :]) ** 2 \
-        #            / (length_scale ** 2)
-        #        K_gradient *= K[..., np.newaxis]
-        #        return K, K_gradient
-        #else:
-        #    return K
-
     def diag(self, X):
         '''
         Returns the diagonal of the kernel k(X, X). The result of this
@@ -187,7 +154,26 @@ class DiffusionKernel(StationaryKernelMixin, Kernel):
             Diagonal of kernel k(X, X)
         '''
 
-        pass
+        diag_values = np.zeros(len(X))
+
+        for i, x in enumerate(X):
+            x_positions = np.array(x[:, 0]).reshape(-1, 1)
+
+            distances = pairwise_distances(
+                x_positions,
+                x_positions,
+                metric='sqeuclidean'
+            )
+
+            x_peaks = np.array(x[:, 1])
+
+            P = np.outer(x_peaks, x_peaks)
+            K = P * np.exp(-distances / (8 * self.sigma))
+
+            # TODO: add other scale factors here
+            diag_values[i] = -np.sum(K)
+
+        return diag_values
 
     def __repr__(self):
         return f'{self.__class__.__name__}({self.sigma:.2f})'
