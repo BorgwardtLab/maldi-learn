@@ -71,8 +71,8 @@ class DiffusionKernel(StationaryKernelMixin, Kernel):
                 raise ValueError(
                     'Gradient can only be evaluated when Y is None.')
 
-            x_positions = np.array([x[0][0] for x in X]).reshape(-1, 1)
-            y_positions = np.array([y[0][0] for y in Y]).reshape(-1, 1)
+            x_positions = np.array([X[:, 0]]).reshape(-1, 1)
+            y_positions = np.array([Y[:, 0]]).reshape(-1, 1)
 
             distances = pairwise_distances(
                 x_positions,
@@ -80,7 +80,14 @@ class DiffusionKernel(StationaryKernelMixin, Kernel):
                 metric='sqeuclidean'
             )
 
-            K = np.exp(distances / (8 * self.sigma))
+            # Calculate scale factors as the outer product of the peak
+            # heights of the input data.
+
+            x_peaks = np.array([X[:, 1]])
+            y_peaks = np.array([Y[:, 1]])
+
+            L = np.outer(x_peaks, y_peaks)
+            K = L * np.exp(-distances / (8 * self.sigma))
 
         return K
 
