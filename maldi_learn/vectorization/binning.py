@@ -1,9 +1,11 @@
 """Transformers for binning spectra."""
 import numpy as np
+
+from sklearn.base import BaseEstimator
 from sklearn.base import TransformerMixin
 
 
-class BinningVectorizer(TransformerMixin):
+class BinningVectorizer(BaseEstimator, TransformerMixin):
     """Vectorizer based on binning MALDI-TOF spectra.
 
     Attributes:
