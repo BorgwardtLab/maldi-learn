@@ -1,9 +1,11 @@
 """Generic preprocessing transformers for spectra."""
 import numpy as np
+
 from sklearn.base import TransformerMixin
+from sklearn.base import BaseEstimator
 
 
-class SubsetPeaksTransformer(TransformerMixin):
+class SubsetPeaksTransformer(BaseEstimator, TransformerMixin):
     """Transform to extract subset of peaks from spectrum."""
 
     def __init__(self, n_peaks):
