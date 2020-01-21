@@ -1,8 +1,6 @@
 """Classes to standardize handling of Spectra."""
 
-import os
 import numpy as np
-import pandas as pd
 
 
 class MaldiTofSpectrum(np.ndarray):
@@ -25,5 +23,19 @@ class MaldiTofSpectrum(np.ndarray):
                 f'Input shape of {peaks.shape} does not match expected shape '
                 'for spectrum [n_peaks, 2].'
             )
-        peaks.n_peaks = peaks.shape[0]
         return peaks
+
+    @property
+    def n_peaks(self):
+        """Get number of peaks of the spectrum."""
+        return self.shape[0]
+
+    @property
+    def intensities(self):
+        """Get the intensities of the spectrum."""
+        return self[:, 1]
+
+    @property
+    def mass_to_charge_ratios(self):
+        """Get mass-t0-charge ratios of spectrum."""
+        return self[:, 0]
