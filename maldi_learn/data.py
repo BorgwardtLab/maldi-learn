@@ -27,15 +27,3 @@ class MaldiTofSpectrum(np.ndarray):
             )
         peaks.n_peaks = peaks.shape[0]
         return peaks
-
-    def _save_spectrum(self, code, path):
-        df_spec = pd.DataFrame(self, columns=['mz','intensities'])
-        df_spec.to_csv(os.path.join(path, f'{code}.txt'), header=True, sep=' ', index=False)
-
-
-
-def write_spectra(X, y, SAVE_PATH):
-    """Save dataset, e.g. after preprocessing has been applied."""
-    
-    for i in range(y.shape[0]):
-        X[i]._save_spectrum(y['code'][i], SAVE_PATH)
