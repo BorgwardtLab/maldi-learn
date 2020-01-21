@@ -83,6 +83,11 @@ class DiffusionKernel(StationaryKernelMixin, Kernel):
         '''
 
         def evaluate_kernel(x, y):
+
+            # Get the positions (masses) of the two spectra. This could
+            # be rewritten more compactly following the new interface.
+            #
+            # TODO: simplify / refactor
             x_positions = np.array(x[:, 0]).reshape(-1, 1)
             y_positions = np.array(y[:, 0]).reshape(-1, 1)
 
@@ -94,7 +99,6 @@ class DiffusionKernel(StationaryKernelMixin, Kernel):
 
             # Calculate scale factors as the outer product of the peak
             # heights of the input data.
-
             x_peaks = np.array(x[:, 1])
             y_peaks = np.array(y[:, 1])
 
@@ -102,9 +106,7 @@ class DiffusionKernel(StationaryKernelMixin, Kernel):
             K = P * np.exp(-distances / (8 * self.sigma))
             K = np.sum(K)
 
-            # TODO: add other scale factors here
-            # TODO: check sign
-            return K
+            return K / (2 * np.sqrt(self.sigma * np.pi))
 
         def evaluate_gradient(x, y):
 
