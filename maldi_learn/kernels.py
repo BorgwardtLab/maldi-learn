@@ -187,7 +187,8 @@ class DiffusionKernel(StationaryKernelMixin, Kernel):
             K = P * np.exp(-distances / (8 * self.sigma))
 
             # TODO: add other scale factors here
-            diag_values[i] = -np.sum(K)
+            # TODO: check sign
+            diag_values[i] = np.sum(K)
 
         return diag_values
 
