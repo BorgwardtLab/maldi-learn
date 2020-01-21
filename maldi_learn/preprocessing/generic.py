@@ -8,11 +8,13 @@ from sklearn.base import BaseEstimator
 class SubsetPeaksTransformer(BaseEstimator, TransformerMixin):
     """Transform to extract subset of peaks from spectrum."""
 
-    def __init__(self, n_peaks):
+    def __init__(self, n_peaks=None):
         """Initialize transformer for subsetting peaks.
 
         Args:
-            n_peaks: Number of peaks to extract from spectrum.
+            n_peaks: Number of peaks to extract from spectrum. If set to
+            `None`, will just pass through input data without changing
+            anything.
             on_less: Behaviour when one of the spectra has less than n_peaks
                 peaks.
 
@@ -25,6 +27,11 @@ class SubsetPeaksTransformer(BaseEstimator, TransformerMixin):
 
     def transform(self, X):
         """Get the n_peaks peaks with the highest intensity."""
+
+        # Bail out early because there is nothing to do
+        if self.n_peaks is None:
+            return X
+
         output = []
         for spectrum in X:
             intensity = spectrum[:, 1]
