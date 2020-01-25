@@ -53,3 +53,32 @@ class TotalIonCurrentNormalizer(BaseEstimator, TransformerMixin):
             self._normalize_spectrum(spectrum)
             for spectrum in X
         ]
+
+
+class ScaleNormalizer(BaseEstimator, TransformerMixin):
+    """
+    Normalizes a set of spectra such that their scales are not too
+    small.
+    """
+
+    def _calculate_min_nonzero_intensity(self, spectra):
+        intensities = np.concatenate(
+            [
+                s.intensities[s.intensities != 0] for s in spectra
+            ],
+            axis=0
+        )
+        return np.min(intensities)
+
+    def _normalize_spectrum(self, spectrum):
+        scaling = 1.0 / self.min_nonzero_intensity
+        return spectrum * np.array([1, scaling])[np.newaxis, :]
+
+    def fit(self, X, y=None):
+        self.min_nonzero_intensity = self._calculate_min_nonzero_intensity(X)
+        return self
+
+    def transform(self, X):
+        return [
+            self._normalize_spectrum(spectrum) for spectrum in X
+        ]
