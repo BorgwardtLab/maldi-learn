@@ -193,4 +193,4 @@ class DiffusionKernel(StationaryKernelMixin, Kernel):
         return diag_values / (4 * self.sigma * np.pi)
 
     def __repr__(self):
-        return f'{self.__class__.__name__}({self.sigma:.2f})'
+        return f'{self.__class__.__name__}({self.sigma:.8f})'
