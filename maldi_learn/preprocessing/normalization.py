@@ -6,27 +6,42 @@ from sklearn.base import BaseEstimator
 
 
 class TotalIonCurrentNormalizer(BaseEstimator, TransformerMixin):
-    """Normalize spectra based on total ion content."""
+    """
+    Normalize spectra based on total ion content. The normalizer
+    supports different normalization strategies.
+    """
 
-    def __init__(self, ignore_zero_intensity=True):
+    def __init__(self, ignore_zero_intensity=True, method='mean'):
         """Initialize total ion content based normalizer.
 
         Args:
             ignore_zero_intensity: Ignore peaks with zero intensity when
                 computing the average used for normalization.
 
+            method: Determines the method that is used to perform the
+            normalization. If set to 'mean', computes averages over the
+            spectra to normalize. If set to 'sum', normalizes each
+            spectrum individually such that its intensities sum to one.
         """
         self.ignore_zero_intensity = ignore_zero_intensity
         self.mean_intensity = None
+        self.method = method
 
-    def _normalize_spectrum(self, spectrum):
-        if self.ignore_zero_intensity:
-            intensities = spectrum.intensities[spectrum.intensities != 0.]
+    def _normalize_spectrum(self, spectrum, method):
+        if method == 'mean':
+            if self.ignore_zero_intensity:
+                intensities = spectrum.intensities[spectrum.intensities != 0.]
+            else:
+                intensities = spectrum.intensities
+            mean_instance_intensity = np.mean(intensities)
+            scaling = mean_instance_intensity / self.mean_intensity
+            return spectrum * np.array([1, scaling])[np.newaxis, :]
+        elif method == 'sum':
+            scaling = 1.0 / np.sum(spectrum.intensities)
+            return spectrum * np.array([1, scaling])[np.newaxis, :]
         else:
-            intensities = spectrum.intensities
-        mean_instance_intensity = np.mean(intensities)
-        scaling = mean_instance_intensity / self.mean_intensity
-        return spectrum * np.array([1, scaling])[np.newaxis, :]
+            raise RuntimeError(
+                    f'Unexpected normalization method "{method}"')
 
     def _compute_mean_intensity_spectra(self, spectra):
         if self.ignore_zero_intensity:
@@ -50,7 +65,7 @@ class TotalIonCurrentNormalizer(BaseEstimator, TransformerMixin):
     def transform(self, X):
         """Normalize spectra using total ion content."""
         return [
-            self._normalize_spectrum(spectrum)
+            self._normalize_spectrum(spectrum, method=self.method)
             for spectrum in X
         ]
 
