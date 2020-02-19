@@ -7,9 +7,7 @@ import pandas as pd
 
 
 def clean_data(filename):
-    df = pd.read_csv(filename, low_memory=False, index_col='code')
-
-    print(np.argwhere(df.index.isna()))
+    df = pd.read_csv(filename, low_memory=False, encoding='utf8')
 
     # Select columns for deletion. We want to remove columns that could
     # potentially leak patient information.
@@ -18,7 +16,6 @@ def clean_data(filename):
         'TAGESNUMMER',
         'Value',
         'A',
-        'Organism(best match)',
         'Score1',
         'Organism(second best match)',
         'Score2',
@@ -35,8 +32,25 @@ def clean_data(filename):
         'LOKALISATION'
     ]
 
-    df = df.drop(columns=columns_to_delete)
-    df = df.rename(columns={'KEIM': 'species'})
+    df = df.drop(columns=columns_to_delete)     # remove obsolete columns
+    df = df.dropna(subset=['code'])             # remove missing codes
+    df = df.drop_duplicates()                   # drop full duplicates
+
+    df = df.rename(columns={
+        'KEIM': 'species',
+        'Organism(best match)': 'bruker_organism_best_match',
+    })
+
+    duplicate_codes = df[df.duplicated('code')]['code'].values
+
+    for code in duplicate_codes:
+        rows = df.loc[df.code == code]
+
+        print(set(rows['species'].values))
+
+    print(df[df.duplicated('code', keep=False)])
+
+    print(np.argwhere(df.index.isna()))
 
 
 if __name__ == '__main__':
