@@ -31,7 +31,7 @@ class DRIAMSDatasetExplorer:
 
             site:
                 Name of the site to query. The function will build the
-                necessary path to access the site automatically. 
+                necessary path to access the site automatically.
 
         Returns
         -------
@@ -59,7 +59,7 @@ class DRIAMSDatasetExplorer:
         # `raw` exists as well. Check all available IDs next.
         if not self._check_id_files(os.path.join(path, 'id')):
             return False
-        
+
         return True
 
     def _check_id_files(self, id_directory):
@@ -83,7 +83,7 @@ class DRIAMSDatasetExplorer:
         # entry in the list.
         valid = [self._is_id_valid(f) for f in filenames]
         return False not in valid
-        
+
     def _is_id_valid(self, id_file):
         if not os.path.exists(id_file):
             return False
@@ -102,6 +102,20 @@ class DRIAMSDatasetExplorer:
         # to not destroy everything.
         return True
 
+    def _get_available_years(self, site):
+
+        path = os.path.join(self.root, site)
+        for _, dirs, files in os.walk(path):
+            years = sorted(dirs)
+            break
+
+        # TODO: check whether spectrum information is available and
+        # if each year has at least a single spectrum associated to
+        # it.
+        return years
+
+    def available_years(self, site):
+        return self._get_available_years(site)
 
     @property
     def available_sites(self):
