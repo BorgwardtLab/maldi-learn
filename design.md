@@ -10,7 +10,7 @@ DRIAMS
       id
         [year]
 
-DRIAMSDataset(root='...')
+DRIAMSDatasetExplorer(root='...')
   - parse file tree
   - grab all information
   - do some consistency checks
