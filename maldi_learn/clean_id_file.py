@@ -35,6 +35,8 @@ def clean_data(filename):
     df = df.drop(columns=columns_to_delete)     # remove obsolete columns
     df = df.dropna(subset=['code'])             # remove missing codes
     df = df.drop_duplicates()                   # drop full duplicates
+    df = df.drop_duplicates(subset=['code'], keep=False) # remove entries with duplicated ids    
+
 
     df = df.rename(columns={
         'KEIM': 'species',
@@ -42,15 +44,15 @@ def clean_data(filename):
     })
 
     duplicate_codes = df[df.duplicated('code')]['code'].values
-
+    
     for code in duplicate_codes:
         rows = df.loc[df.code == code]
+        
+        #print(set(rows['species'].values))
 
-        print(set(rows['species'].values))
+    #print(df[df.duplicated('code', keep=False)])
 
-    print(df[df.duplicated('code', keep=False)])
-
-    print(np.argwhere(df.index.isna()))
+    #print(np.argwhere(df.index.isna()))
 
 
 if __name__ == '__main__':
