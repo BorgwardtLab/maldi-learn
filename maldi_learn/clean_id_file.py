@@ -8,6 +8,8 @@ import pandas as pd
 
 def clean_data(filename, outfile):
     df = pd.read_csv(filename, low_memory=False, encoding='utf8')
+    print(f'\nInput file: {filename}')
+    print(f'ID file starting shape: {df.shape}')
 
     # Select columns for deletion. We want to remove columns that could
     # potentially leak patient information.
@@ -31,20 +33,22 @@ def clean_data(filename, outfile):
         'EINGANGSDATUM',
         'LOKALISATION'
     ]
-
+    print(f'Remove columns: {columns_to_delete}')    
+    
     df = df.drop(columns=columns_to_delete)     # remove obsolete columns
     df = df.dropna(subset=['code'])             # remove missing codes
     df = df.drop_duplicates()                   # drop full duplicates
+    print(f'ID file shape after basic clean-up: {df.shape}')
 
     duplicate_codes = df[df.duplicated('code')]['code'].values
     df = df.drop_duplicates(subset=['code'], keep=False) # remove entries with duplicated ids    
+    print(f'Number of non-unique codes: {len(duplicate_codes)}')
+    print(f'ID file final shape: {df.shape}')
 
     df = df.rename(columns={
         'KEIM': 'species',
         'Organism(best match)': 'bruker_organism_best_match',
     })
-
-    print(df.head())
 
     df.to_csv(outfile)
 
