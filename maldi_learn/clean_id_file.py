@@ -6,7 +6,7 @@ import numpy as np
 import pandas as pd
 
 
-def clean_data(filename):
+def clean_data(filename, outfile):
     df = pd.read_csv(filename, low_memory=False, encoding='utf8')
 
     # Select columns for deletion. We want to remove columns that could
@@ -35,30 +35,24 @@ def clean_data(filename):
     df = df.drop(columns=columns_to_delete)     # remove obsolete columns
     df = df.dropna(subset=['code'])             # remove missing codes
     df = df.drop_duplicates()                   # drop full duplicates
-    df = df.drop_duplicates(subset=['code'], keep=False) # remove entries with duplicated ids    
 
+    duplicate_codes = df[df.duplicated('code')]['code'].values
+    df = df.drop_duplicates(subset=['code'], keep=False) # remove entries with duplicated ids    
 
     df = df.rename(columns={
         'KEIM': 'species',
         'Organism(best match)': 'bruker_organism_best_match',
     })
 
-    duplicate_codes = df[df.duplicated('code')]['code'].values
-    
-    for code in duplicate_codes:
-        rows = df.loc[df.code == code]
-        
-        #print(set(rows['species'].values))
+    print(df.head())
 
-    #print(df[df.duplicated('code', keep=False)])
-
-    #print(np.argwhere(df.index.isna()))
-
+    df.to_csv(outfile)
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
     parser.add_argument('INPUT', type=str, help='Input file')
+    parser.add_argument('OUTPUT', type=str, help='Output file')
 
     args = parser.parse_args()
 
-    clean_data(args.INPUT)
+    clean_data(args.INPUT, args.OUTPUT)
