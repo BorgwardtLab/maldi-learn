@@ -117,6 +117,42 @@ class DRIAMSDatasetExplorer:
         # it.
         return years
 
+    def _get_available_antibiotics(self, site, year):
+        '''
+        Queries a given site for the antibiotics that are available in
+        it and returns them.
+
+        Parameters
+        ----------
+
+        site:
+            Identifier of the site that is to be queried. The function
+            will build the paths accordingly.
+
+        year:
+            Year for which the given site should be queried. The
+            function will build the paths accordingly.
+
+        Returns
+        -------
+
+        List of antibiotic names, sorted in alphabetical order.
+        '''
+
+        path = os.path.join(
+                self.root,
+                site,
+                'id',
+                year,
+                f'{year}_clean.csv'
+        )
+
+        df = pd.read_csv(path)
+        antibiotics = [c for c in df.columns if c[0].isupper()]
+        antibiotics = [a for a in antibiotics if not 'Unnamed' in a]
+
+        return sorted(antibiotics)
+
     def available_years(self, site):
         return self._get_available_years(site)
 
@@ -201,3 +237,5 @@ _, df = load_driams_dataset('/Volumes/bs-dfs/Data/DRIAMS', 'DRIAMS-A', '2015', '
 print(df.to_numpy().shape)
 print(df.to_numpy().dtype)
 print(df.to_numpy()[0])
+
+print(explorer._get_available_antibiotics('DRIAMS-A', '2015'))
