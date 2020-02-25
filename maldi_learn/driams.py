@@ -155,8 +155,8 @@ class DRIAMSDataset:
 def load_driams_dataset(root, site, year, species, antibiotic, handle_missing_values='remove_all_missing'):
    
     # TODO make work for raw and preprocessed spectra 
-    path_X = os.path.join('/links/groups/borgwardt/Data/DRIAMS', site, 'preprocessed', year)
-    id_file = os.path.join('/links/groups/borgwardt/Data/DRIAMS', site, 'id', year, f'{year}_clean.csv')
+    path_X = os.path.join(root, site, 'preprocessed', year)
+    id_file = os.path.join(root, site, 'id', year, f'{year}_clean.csv')
     
     # read in id 
     metadata = _load_metadata(id_file, species, antibiotic, handle_missing_values)    
@@ -173,6 +173,7 @@ def load_driams_dataset(root, site, year, species, antibiotic, handle_missing_va
 
 
 def _load_metadata(filename, species, antibiotic, handle_missing_values):
+    print(filename)
     metadata = pd.read_csv(filename)
     
     metadata = metadata.query('species == @species')
@@ -188,14 +189,14 @@ def _load_metadata(filename, species, antibiotic, handle_missing_values):
 
 # HERE BE DRAGONS
 
-explorer = DRIAMSDatasetExplorer('/links/groups/borgwardt/Data/DRIAMS')
+explorer = DRIAMSDatasetExplorer('/Volumes/bs-dfs/Data/DRIAMS')
 
 print(explorer.__dict__)
 print(explorer.available_sites)
 print(explorer.available_years)
 print(explorer._is_site_valid('DRIAMS-A'))
 
-_, df = load_driams_dataset('/links/groups/borgwardt/Data/DRIAMS', 'DRIAMS-A', '2015', 'Staphylococcus aureus', 'Ciprofloxacin')
+_, df = load_driams_dataset('/Volumes/bs-dfs/Data/DRIAMS', 'DRIAMS-A', '2015', 'Staphylococcus aureus', 'Ciprofloxacin')
 
 print(df.to_numpy().shape)
 print(df.to_numpy().dtype)
