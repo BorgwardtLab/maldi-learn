@@ -150,7 +150,7 @@ class DRIAMSDatasetExplorer:
 
         df = pd.read_csv(path)
         antibiotics = [c for c in df.columns if c[0].isupper()]
-        antibiotics = [a for a in antibiotics if not 'Unnamed' in a]
+        antibiotics = [a for a in antibiotics if 'Unnamed' not in a]
 
         return sorted(antibiotics)
 
