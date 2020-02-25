@@ -318,7 +318,12 @@ def _load_metadata(
             'keep'
     ]
 
-    metadata = pd.read_csv(filename, low_memory=False, na_values=['-'])
+    metadata = pd.read_csv(
+                    filename,
+                    low_memory=False,
+                    na_values=['-'],
+                    keep_default_na=True,
+                )
 
     metadata = metadata.query('species == @species')
     print(metadata.species)
