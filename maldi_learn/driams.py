@@ -12,6 +12,7 @@ from maldi_learn.data import MaldiTofSpectrum
 
 _metadata_columns = ['code', 'bruker_organism_best_match', 'species']
 
+
 class DRIAMSDatasetExplorer:
     def __init__(self, root):
         self.root = root
