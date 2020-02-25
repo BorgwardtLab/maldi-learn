@@ -3,18 +3,24 @@ Main module for the DRIAMS dataset. Contains general exploration classes
 and loaders.
 '''
 
+import dotenv
 import os
-import glob
 
 import pandas as pd
 
 from maldi_learn.data import MaldiTofSpectrum
 
+# Pulls in the environment variables in order to simplify the access to
+# the root directory.
+dotenv.load_dotenv()
+
+DRIAMS_ROOT = os.getenv('DRIAMS_ROOT')
+
 _metadata_columns = ['code', 'bruker_organism_best_match', 'species']
 
 
 class DRIAMSDatasetExplorer:
-    def __init__(self, root):
+    def __init__(self, root=DRIAMS_ROOT):
         self.root = root
 
     def _get_available_sites(self):
@@ -240,14 +246,14 @@ def _load_metadata(filename, species, antibiotic, handle_missing_values):
 
 # HERE BE DRAGONS
 
-explorer = DRIAMSDatasetExplorer('/Volumes/bs-dfs/Data/DRIAMS')
+explorer = DRIAMSDatasetExplorer('/Volumes/borgwardt/Data/DRIAMS')
 
 print(explorer.__dict__)
 print(explorer.available_sites)
 print(explorer.available_years)
 print(explorer._is_site_valid('DRIAMS-A'))
 
-_, df = load_driams_dataset('/Volumes/bs-dfs/Data/DRIAMS', 'DRIAMS-A', '2015', 'Staphylococcus aureus', 'Ciprofloxacin')
+_, df = load_driams_dataset(explorer.root, 'DRIAMS-A', '2015', 'Staphylococcus aureus', 'Ciprofloxacin')
 
 print(df.to_numpy().shape)
 print(df.to_numpy().dtype)
