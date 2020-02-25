@@ -154,6 +154,20 @@ class DRIAMSDatasetExplorer:
 
         return sorted(antibiotics)
 
+    def available_antibiotics(self, site):
+        """Return all available antibiotics for a given site.
+
+        Returns
+        -------
+        All available antibiotics for the given site, in a `dict` whose
+        keys represent the available years, and whose values represent
+        the antibiotics.
+        """
+        return {
+            year: self._get_available_antibiotics(site, year)
+            for year in self.available_years(site)
+        }
+
     def available_years(self, site):
         return self._get_available_years(site)
 
