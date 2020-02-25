@@ -253,10 +253,10 @@ print(explorer.available_sites)
 print(explorer.available_years)
 print(explorer._is_site_valid('DRIAMS-A'))
 
-_, df = load_driams_dataset(explorer.root, 'DRIAMS-A', '2015', 'Staphylococcus aureus', 'Ciprofloxacin')
+_, df = load_driams_dataset(explorer.root, 'DRIAMS-A', '2017', 'Staphylococcus aureus', 'Ciprofloxacin')
 
 print(df.to_numpy().shape)
 print(df.to_numpy().dtype)
 print(df.to_numpy()[0])
 
-print(explorer._get_available_antibiotics('DRIAMS-A', '2015'))
+print(explorer._get_available_antibiotics('DRIAMS-A', '2017'))
