@@ -408,3 +408,5 @@ print(df.to_numpy().dtype)
 print(df.to_numpy()[0])
 
 print(explorer._get_available_antibiotics('DRIAMS-A', '2017'))
+
+print(DRIAMSLabelEncoder().transform(df))
