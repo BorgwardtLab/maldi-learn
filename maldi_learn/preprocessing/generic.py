@@ -43,11 +43,27 @@ class SubsetPeaksTransformer(BaseEstimator, TransformerMixin):
 
 class LabelEncoder(BaseEstimator, TransformerMixin):
     
-    def __init__(self, encodings):
+    def __init__(self, encodings, ignore_columns):
         """
         
         encoding: 
             dictionary mapping the labels to their output.
+        ignore_columns:
+            names of columns that should be ignored during encoding.
 
         """
 
+    def fit(self, y):
+        """Fit transformer, subsets valid columns."""
+        return self
+
+
+    def transform(self, y):
+        """Transforms dataframe content to encoded labels."""
+
+        y_encoded = y.copy()
+        valid_columns= [
+                col for col in y_encoded.columns if col not in ignore_columns]
+
+        y_encoded[valid_columns].replace(encodings, inplace=True)
+        return y_encoded
