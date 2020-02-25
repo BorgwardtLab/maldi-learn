@@ -213,7 +213,8 @@ def load_driams_dataset(
     year,
     species,
     antibiotic,
-    handle_missing_values='remove_all_missing'
+    handle_missing_resistance_measurements='remove_all_missing',
+    load_raw=False,
 ):
     """Load DRIAMS data set for a specific site and specific year.
 
@@ -252,27 +253,49 @@ def load_driams_dataset(
             'remove_any_missing'
             'keep'
 
+    load_raw:
+        If set, loads the *raw* spectra instead of the pre-processed
+        one. This has no bearing whatsoever on the labels and metadata
+        and merely changes the resulting spectra. If not set, loads
+        the pre-processed spectra instead.
+
     Returns
     -------
 
     Instance of `DRIAMSDataset`, containing all loaded spectra.
     """
-    # TODO make work for raw and preprocessed spectra
-    path_X = os.path.join(root, site, 'preprocessed', year)
-    id_file = os.path.join(root, site, 'id', year, f'{year}_clean.csv')
-    
-    # read in id 
-    metadata = _load_metadata(id_file, species, antibiotic, handle_missing_values)    
-    
-    # extract spectra id
-    codes = metadata.code
-    
-    # load spectra
-    #spectra = [MaldiTofSpectrum(pd.read_csv(f'{code}.txt', sep=' ', comment='#', engine='c').values) for code in codes]
-    
-    spectra = []
-    return spectra, metadata
+    if load_raw:
+        spectra_type = 'raw'
+    else:
+        spectra_type = 'preprocessed'
 
+    path_X = os.path.join(root, site, spectra_type, year)
+    id_file = os.path.join(root, site, 'id', year, f'{year}_clean.csv')
+
+    # Metadata contains all information that we have about the
+    # individual spectra and the selected antibiotics.
+    metadata = _load_metadata(
+        id_file,
+        species,
+        antibiotic,
+        handle_missing_resistance_measurements
+    )
+
+    # The codes are used to uniquely identify the spectra that we can
+    # load. They are required for matching files and metadata.
+    codes = metadata.code
+
+    spectra_files = [
+        os.path.join(path_X, f'{code}.txt') for code in codes
+    ]
+
+    spectra = [
+        MaldiTofSpectrum(
+            pd.read_csv(f, sep=' ', comment='#', engine='c').values
+        ) for f in spectra_files
+    ]
+
+    return spectra, metadata
 
 
 def _load_metadata(filename, species, antibiotic, handle_missing_values):
