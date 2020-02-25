@@ -6,9 +6,11 @@ and loaders.
 import dotenv
 import os
 
+import numpy as np
 import pandas as pd
 
 from maldi_learn.data import MaldiTofSpectrum
+from maldi_learn.preprocessing.generic import LabelEncoder
 
 # Pulls in the environment variables in order to simplify the access to
 # the root directory.
@@ -350,6 +352,37 @@ def _load_metadata(
     return metadata
 
 
+class DRIAMSLabelEncoder(LabelEncoder):
+    """Encoder for DRIAMS labels.
+
+    Encodes antibiotic resistance measurements in a standardised manner.
+    Specifically, *resistant* or *intermediate* measurements are will be
+    converted to `1`, while *suspectible* measurements will be converted
+    to `0`.
+    """
+
+    def __init__(self):
+        """Create new instance of the encoder."""
+        # These are the default encodings for the DRIAMS dataset. If
+        # other values show up, they will not be handled; this is by
+        # design.
+        encodings = {
+            'R': 1,
+            'I': 1,
+            'S': 0,
+            'R(1)': np.nan,
+            'L(1)': np.nan,
+            'I(1)': np.nan,
+            'I(1), S(1)': np.nan,
+            'R(1), I(1)': np.nan,
+            'R(1), S(1)': np.nan,
+            'R(1), I(1), S(1)': np.nan
+        }
+
+        # Ignore the metadata columns to ensure that these values will
+        # not be replaced anywhere else.
+        super().__init__(encodings, _metadata_columns)
+
 # HERE BE DRAGONS
 
 explorer = DRIAMSDatasetExplorer('/Volumes/borgwardt/Data/DRIAMS')
@@ -364,7 +397,7 @@ print(explorer._is_site_valid('DRIAMS-A'))
 _, df = load_driams_dataset(
             explorer.root,
             'DRIAMS-A',
-            '2017',
+            '2015',
             'Staphylococcus aureus',
             ['Ciprofloxacin', 'Penicillin'],
             'remove_if_all_missing'
@@ -374,4 +407,6 @@ print(df.to_numpy().shape)
 print(df.to_numpy().dtype)
 print(df.to_numpy()[0])
 
-print(explorer._get_available_antibiotics('DRIAMS-A', '2017'))
+print(explorer._get_available_antibiotics('DRIAMS-A', '2015'))
+
+print(DRIAMSLabelEncoder().transform(df))
