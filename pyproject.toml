@@ -12,6 +12,7 @@ python = ">=3.6"
 scikit-learn = "^0.22.1"
 topf = {git = "ssh://git@github.com/BorgwardtLab/Topf.git"}
 pandas = "^0.25.3"
+python-dotenv = "^0.11.0"
 [tool.poetry.dev-dependencies]
 pytest = "^3.0"
 
