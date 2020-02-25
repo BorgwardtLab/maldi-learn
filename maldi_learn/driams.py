@@ -212,8 +212,8 @@ def load_driams_dataset(
     site,
     year,
     species,
-    antibiotic,
-    handle_missing_resistance_measurements='remove_all_missing',
+    antibiotics,
+    handle_missing_resistance_measurements='remove_if_all_missing',
     load_raw=False,
 ):
     """Load DRIAMS data set for a specific site and specific year.
@@ -242,15 +242,17 @@ def load_driams_dataset(
     species:
         Identifier for the species, such as *Staphylococcus aureus*.
 
-    antibiotic:
-        Identifier for the antibiotic to use, such as *Ciprofloxacin*.
+    antibiotics:
+        Identifier for the antibiotics to use, such as *Ciprofloxacin*.
+        Can be either a `list` of strings or a single `str`, in which
+        case only a single antibiotic will be loaded.
 
     handle_missing_resistance_measurements:
         Strategy for handling missing resistance measurements. Can be
         one of the following:
 
-            'remove_all_missing'
-            'remove_any_missing'
+            'remove_if_all_missing'
+            'remove_if_any_missing'
             'keep'
 
     load_raw:
@@ -277,7 +279,7 @@ def load_driams_dataset(
     metadata = _load_metadata(
         id_file,
         species,
-        antibiotic,
+        antibiotics,
         handle_missing_resistance_measurements
     )
 
@@ -298,28 +300,44 @@ def load_driams_dataset(
     return spectra, metadata
 
 
-def _load_metadata(filename, species, antibiotic, handle_missing_values):
-    '''
-     
-    '''
-    assert handle_missing_values in [
-            'remove_all_missing', 'remove_any_missing', 'keep']
-    metadata = pd.read_csv(filename, low_memory=False)
-    
+def _load_metadata(
+    filename,
+    species,
+    antibiotics,
+    handle_missing_resistance_measurements
+):
+
+    # Ensures that we always get a list of antibiotics for subsequent
+    # processing.
+    if type(antibiotics) is not list:
+        antibiotics = [antibiotics]
+
+    assert handle_missing_resistance_measurements in [
+            'remove_if_all_missing',
+            'remove_if_any_missing',
+            'keep'
+    ]
+
+    metadata = pd.read_csv(filename, low_memory=False, na_values=['-'])
+
     metadata = metadata.query('species == @species')
     print(metadata.species)
 
     # TODO make cleaner
-    metadata = metadata[_metadata_columns+[antibiotic]]
-    
+    metadata = metadata[_metadata_columns + antibiotics]
+    n_antibiotics = len(antibiotics)
+
     # handle_missing_values
-    if handle_missing_values=='remove_all_missing' or \
-       handle_missing_values=='remove_any_missing':
-        metadata = metadata.iloc[~metadata[antibiotic].isna().values]
+    if handle_missing_resistance_measurements == 'remove_if_all_missing':
+        na_values = metadata[antibiotics].isna().sum(axis='columns')
+        metadata = metadata[na_values != n_antibiotics]
+    elif handle_missing_resistance_measurements == 'remove_if_any_missing':
+        na_values = metadata[antibiotics].isna().sum(axis='columns')
+        metadata = metadata[na_values == 0]
     else:
         pass
-    return metadata    
 
+    return metadata
 
 
 # HERE BE DRAGONS
@@ -331,7 +349,14 @@ print(explorer.available_sites)
 print(explorer.available_years)
 print(explorer._is_site_valid('DRIAMS-A'))
 
-_, df = load_driams_dataset(explorer.root, 'DRIAMS-A', '2017', 'Staphylococcus aureus', 'Ciprofloxacin')
+_, df = load_driams_dataset(
+            explorer.root,
+            'DRIAMS-A',
+            '2017',
+            'Staphylococcus aureus',
+            ['Ciprofloxacin', 'Penicillin'],
+            'remove_if_all_missing'
+)
 
 print(df.to_numpy().shape)
 print(df.to_numpy().dtype)
