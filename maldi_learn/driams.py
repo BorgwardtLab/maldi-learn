@@ -220,8 +220,9 @@ def load_driams_dataset(
     year,
     species,
     antibiotics,
+    encoder=None,
     handle_missing_resistance_measurements='remove_if_all_missing',
-    load_raw=False,
+    load_raw=False
 ):
     """Load DRIAMS data set for a specific site and specific year.
 
@@ -253,6 +254,17 @@ def load_driams_dataset(
         Identifier for the antibiotics to use, such as *Ciprofloxacin*.
         Can be either a `list` of strings or a single `str`, in which
         case only a single antibiotic will be loaded.
+
+    encoder:
+        If set, provides a mechanism for encoding labels into numbers.
+        This will be applied *prior* to the missing value handling, so
+        it is a simple strategy to remove invalid values. If no encoder
+        is set, only missing values in the original data will be
+        handled.
+
+        Suitable values for `encoder` are instances of the
+        `DRIAMSLabelEncoder` class, which performs our preferred
+        encoding of labels.
 
     handle_missing_resistance_measurements:
         Strategy for handling missing resistance measurements. Can be
@@ -287,6 +299,7 @@ def load_driams_dataset(
         id_file,
         species,
         antibiotics,
+        encoder,
         handle_missing_resistance_measurements
     )
 
@@ -311,6 +324,7 @@ def _load_metadata(
     filename,
     species,
     antibiotics,
+    encoder,
     handle_missing_resistance_measurements
 ):
 
@@ -333,11 +347,13 @@ def _load_metadata(
                 )
 
     metadata = metadata.query('species == @species')
-    print(metadata.species)
 
     # TODO make cleaner
     metadata = metadata[_metadata_columns + antibiotics]
     n_antibiotics = len(antibiotics)
+
+    if encoder is not None:
+        metadata = encoder.fit_transform(metadata)
 
     # handle_missing_values
     if handle_missing_resistance_measurements == 'remove_if_all_missing':
@@ -400,12 +416,14 @@ _, df = load_driams_dataset(
             '2015',
             'Staphylococcus aureus',
             ['Ciprofloxacin', 'Penicillin'],
-            'remove_if_all_missing'
+            encoder=DRIAMSLabelEncoder(),
+            handle_missing_resistance_measurements='remove_if_all_missing',
 )
 
 print(df.to_numpy().shape)
 print(df.to_numpy().dtype)
 print(df.to_numpy()[0])
+print(df)
 
 print(explorer._get_available_antibiotics('DRIAMS-A', '2015'))
 

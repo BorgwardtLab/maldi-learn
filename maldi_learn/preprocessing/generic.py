@@ -59,6 +59,8 @@ class LabelEncoder(BaseEstimator, TransformerMixin):
         """Fit transformer, subsets valid columns."""
         return self
 
+    def fit_transform(self, y):
+        return self.transform(y)
 
     def transform(self, y):
         """Transforms dataframe content to encoded labels."""
