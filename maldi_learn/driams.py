@@ -326,6 +326,8 @@ def _load_metadata(filename, species, antibiotic, handle_missing_values):
 
 explorer = DRIAMSDatasetExplorer('/Volumes/borgwardt/Data/DRIAMS')
 
+print(explorer._get_available_antibiotics('DRIAMS-A', '2015'))
+
 print(explorer.__dict__)
 print(explorer.available_sites)
 print(explorer.available_years)
