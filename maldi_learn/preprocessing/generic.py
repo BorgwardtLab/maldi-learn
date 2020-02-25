@@ -64,8 +64,11 @@ class LabelEncoder(BaseEstimator, TransformerMixin):
         """Transforms dataframe content to encoded labels."""
 
         y_encoded = y.copy()
+
         valid_columns= [
                 col for col in y_encoded.columns if col not in self.ignore_columns]
 
-        y_encoded[valid_columns].replace(self.encodings, inplace=True)
+        y_encoded[valid_columns] = y_encoded[valid_columns].replace(
+                                    self.encodings)
+
         return y_encoded
