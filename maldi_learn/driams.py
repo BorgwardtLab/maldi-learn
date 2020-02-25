@@ -233,8 +233,8 @@ def _load_metadata(filename, species, antibiotic, handle_missing_values):
     '''
     
     '''
-    assert handle_missing_values in
-    ['remove_all_missing', 'remove_any_missing', 'keep']
+    assert handle_missing_values in [
+            'remove_all_missing', 'remove_any_missing', 'keep']
     metadata = pd.read_csv(filename)
     
     metadata = metadata.query('species == @species')
