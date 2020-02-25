@@ -39,3 +39,15 @@ class SubsetPeaksTransformer(BaseEstimator, TransformerMixin):
             # We want to sort back the indices to perserve the original order
             output.append(spectrum[sorted(peak_indices[:self.n_peaks])])
         return output
+
+
+class LabelEncoder(BaseEstimator, TransformerMixin):
+    
+    def __init__(self, encodings):
+        """
+        
+        encoding: 
+            dictionary mapping the labels to their output.
+
+        """
+
