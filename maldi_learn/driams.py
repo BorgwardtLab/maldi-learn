@@ -410,7 +410,7 @@ print(explorer.available_sites)
 print(explorer.available_years)
 print(explorer._is_site_valid('DRIAMS-A'))
 
-_, df = load_driams_dataset(
+spectra, df = load_driams_dataset(
             explorer.root,
             'DRIAMS-A',
             '2015',
@@ -428,3 +428,10 @@ print(df)
 print(explorer._get_available_antibiotics('DRIAMS-A', '2015'))
 
 print(DRIAMSLabelEncoder().transform(df))
+
+from maldi_learn.vectorization import BinningVectorizer
+
+bv = BinningVectorizer(1000, min_bin=2000, max_bin=20000)
+
+X = bv.fit_transform(spectra)
+print(X.shape)
