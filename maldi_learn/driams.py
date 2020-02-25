@@ -8,6 +8,9 @@ import glob
 
 import pandas as pd
 
+from maldi_learn.data import MaldiTofSpectrum
+
+_metadata_columns = ['code', 'bruker_organism_best_match', 'species']
 
 class DRIAMSDatasetExplorer:
     def __init__(self, root):
@@ -17,7 +20,6 @@ class DRIAMSDatasetExplorer:
         for _, dirs, _ in os.walk(self.root):
             sites = sorted(dirs)
             break
-
         return sites
 
     def _is_site_valid(self, site):
@@ -108,7 +110,8 @@ class DRIAMSDatasetExplorer:
         for _, dirs, files in os.walk(path):
             years = sorted(dirs)
             break
-
+        
+        print(years)
         # TODO: check whether spectrum information is available and
         # if each year has at least a single spectrum associated to
         # it.
@@ -121,9 +124,79 @@ class DRIAMSDatasetExplorer:
     def available_sites(self):
         return self._get_available_sites()
 
+
+
+class DRIAMSDataset:
+    
+    def __init__(self, X, y):
+        self.X = X
+        self.y = y
+        # TODO include checks if input is valid
+
+
+    @property
+    def is_multitask(self):
+        n_cols = [c for c in self.y.columns if c not in _metadata_columns]
+        return n_cols != 1
+    
+    # TODO implement
+    @property
+    def n_samples(self):
+        return 
+
+    # TODO implement
+    @property
+    def class_ratio(self):
+        # return dict with label as key, and class fraction as value
+        return fraq_dict
+    
+
+
+def load_driams_dataset(root, site, year, species, antibiotic, handle_missing_values='remove_all_missing'):
+   
+    # TODO make work for raw and preprocessed spectra 
+    path_X = os.path.join('/links/groups/borgwardt/Data/DRIAMS', site, 'preprocessed', year)
+    id_file = os.path.join('/links/groups/borgwardt/Data/DRIAMS', site, 'id', year, f'{year}_clean.csv')
+    
+    # read in id 
+    metadata = _load_metadata(id_file, species, antibiotic, handle_missing_values)    
+    
+    # extract spectra id
+    codes = metadata.code
+    
+    # load spectra
+    #spectra = [MaldiTofSpectrum(pd.read_csv(f'{code}.txt', sep=' ', comment='#', engine='c').values) for code in codes]
+    
+    spectra = []
+    return spectra, metadata
+
+
+
+def _load_metadata(filename, species, antibiotic, handle_missing_values):
+    metadata = pd.read_csv(filename)
+    
+    metadata = metadata.query('species == @species')
+    print(metadata.species)
+
+    # TODO cleaner
+    metadata = metadata[_metadata_columns]
+    # TODO include handle_missing_values
+
+    return metadata    
+
+
+
 # HERE BE DRAGONS
 
-explorer = DRIAMSDatasetExplorer('/Volumes/borgwardt/Data/DRIAMS')
+explorer = DRIAMSDatasetExplorer('/links/groups/borgwardt/Data/DRIAMS')
 
+print(explorer.__dict__)
 print(explorer.available_sites)
+print(explorer.available_years)
 print(explorer._is_site_valid('DRIAMS-A'))
+
+_, df = load_driams_dataset('/links/groups/borgwardt/Data/DRIAMS', 'DRIAMS-A', '2015', 'Staphylococcus aureus', 'Ciprofloxacin')
+
+print(df.to_numpy().shape)
+print(df.to_numpy().dtype)
+print(df.to_numpy()[0])
