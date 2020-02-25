@@ -205,7 +205,12 @@ class DRIAMSDataset:
     def class_ratio(self):
         # return dict with label as key, and class fraction as value
         return fraq_dict
-
+    
+    # TODO implement
+    def to_numpy(self): 
+        # return y as numpy array as imput for classification
+        y_numpy = self.y
+        return y_numpy
 
 def load_driams_dataset(
     root,
