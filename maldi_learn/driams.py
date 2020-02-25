@@ -117,8 +117,7 @@ class DRIAMSDatasetExplorer:
         for _, dirs, files in os.walk(path):
             years = sorted(dirs)
             break
-        
-        print(years)
+
         # TODO: check whether spectrum information is available and
         # if each year has at least a single spectrum associated to
         # it.
@@ -206,12 +205,59 @@ class DRIAMSDataset:
     def class_ratio(self):
         # return dict with label as key, and class fraction as value
         return fraq_dict
-    
 
 
-def load_driams_dataset(root, site, year, species, antibiotic, handle_missing_values='remove_all_missing'):
-   
-    # TODO make work for raw and preprocessed spectra 
+def load_driams_dataset(
+    root,
+    site,
+    year,
+    species,
+    antibiotic,
+    handle_missing_values='remove_all_missing'
+):
+    """Load DRIAMS data set for a specific site and specific year.
+
+    This is the main loading function for interacting with DRIAMS
+    datasets. Given required information about a site, a year, and
+    a list of antibiotics, this function loads a dataset, handles
+    missing values, and returns a `DRIAMSDataset` class instance.
+
+    Notice that no additional post-processing will be performed. The
+    spectra might thus have different lengths are not directly suitable
+    for downstream processing in, say, a `scikit-learn` pipeline.
+
+    Parameters
+    ----------
+
+    root:
+        Root path to the DRIAMS dataset folder.
+
+    site:
+        Identifier of a site, such as `DRIAMS-A`.
+
+    year:
+        Identifier for the year, such as `2015`.
+
+    species:
+        Identifier for the species, such as *Staphylococcus aureus*.
+
+    antibiotic:
+        Identifier for the antibiotic to use, such as *Ciprofloxacin*.
+
+    handle_missing_resistance_measurements:
+        Strategy for handling missing resistance measurements. Can be
+        one of the following:
+
+            'remove_all_missing'
+            'remove_any_missing'
+            'keep'
+
+    Returns
+    -------
+
+    Instance of `DRIAMSDataset`, containing all loaded spectra.
+    """
+    # TODO make work for raw and preprocessed spectra
     path_X = os.path.join(root, site, 'preprocessed', year)
     id_file = os.path.join(root, site, 'id', year, f'{year}_clean.csv')
     
