@@ -52,6 +52,8 @@ class LabelEncoder(BaseEstimator, TransformerMixin):
             names of columns that should be ignored during encoding.
 
         """
+        self.encodings = encodings
+        self.ignore_columns = ignore_columns
 
     def fit(self, y):
         """Fit transformer, subsets valid columns."""
@@ -63,7 +65,7 @@ class LabelEncoder(BaseEstimator, TransformerMixin):
 
         y_encoded = y.copy()
         valid_columns= [
-                col for col in y_encoded.columns if col not in ignore_columns]
+                col for col in y_encoded.columns if col not in self.ignore_columns]
 
-        y_encoded[valid_columns].replace(encodings, inplace=True)
+        y_encoded[valid_columns].replace(self.encodings, inplace=True)
         return y_encoded
