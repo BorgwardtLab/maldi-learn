@@ -300,21 +300,21 @@ def load_driams_dataset(
 
 def _load_metadata(filename, species, antibiotic, handle_missing_values):
     '''
-    
+     
     '''
     assert handle_missing_values in [
             'remove_all_missing', 'remove_any_missing', 'keep']
-    metadata = pd.read_csv(filename)
+    metadata = pd.read_csv(filename, low_memory=False)
     
     metadata = metadata.query('species == @species')
     print(metadata.species)
 
-    # TODO cleaner
+    # TODO make cleaner
     metadata = metadata[_metadata_columns+[antibiotic]]
     
     # handle_missing_values
-    if handle_missing_values=='remove_all_missing' or
-    handle_missing_values=='remove_any_missing':
+    if handle_missing_values=='remove_all_missing' or \
+       handle_missing_values=='remove_any_missing':
         metadata = metadata.iloc[~metadata[antibiotic].isna().values]
     else:
         pass
