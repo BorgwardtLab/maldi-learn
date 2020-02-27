@@ -213,7 +213,7 @@ class DRIAMSDataset:
     @property
     def n_label_avail(self):
         return self.y.loc[:, [col for col in self.y.columns if col not in
-            _metadata_columns]].isna().sum(axis=0)
+            _metadata_columns]].notna().sum(axis=0)
 
     # TODO implement
     @property
@@ -434,16 +434,9 @@ spectra, df = load_driams_dataset(
             handle_missing_resistance_measurements='remove_if_all_missing',
 )
 
-<<<<<<< HEAD
 dd = DRIAMSDataset(spectra, df)
 print(dd.n_label_avail)
-
-=======
-print(df.to_numpy().shape)
-print(df.to_numpy().dtype)
-print(df.to_numpy()[0])
-print(df)
->>>>>>> 54f1cc66ca941174b6922f32bc9df4a8ec70132d
+print(dd.n_label_avail[0])
 
 print(explorer._get_available_antibiotics('DRIAMS-A', '2015'))
 
