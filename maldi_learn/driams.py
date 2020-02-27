@@ -187,20 +187,33 @@ class DRIAMSDatasetExplorer:
 class DRIAMSDataset:
     
     def __init__(self, X, y):
+        """
+        X: 
+            List of MaldiTofSpectra objects.
+        y:  
+            Metadata Pandas dataframe. Columns with antimicrobial
+            information are indicated by capitalized header.
+
+        """
+        # checks if input is valid
+        assert len(X) == y.shape[0]
+        
         self.X = X
         self.y = y
-        # TODO include checks if input is valid
-
 
     @property
     def is_multitask(self):
         n_cols = [c for c in self.y.columns if c not in _metadata_columns]
         return n_cols != 1
     
-    # TODO implement
     @property
     def n_samples(self):
-        return 
+        return self.y.shape[0] 
+
+    @property
+    def n_label_avail(self):
+        return self.y.loc[:, [col for col in self.y.columns if col not in
+            _metadata_columns]].isna().sum(axis=0)
 
     # TODO implement
     @property
@@ -211,7 +224,7 @@ class DRIAMSDataset:
     # TODO implement
     def to_numpy(self): 
         # return y as numpy array as imput for classification
-        y_numpy = self.y
+        y_numpy = self.y.to_numpy()
         return y_numpy
 
 def load_driams_dataset(
@@ -304,6 +317,7 @@ def load_driams_dataset(
         ) for f in spectra_files
     ]
 
+    # TODO doesn't return a DRIAMSDataset instance yet
     return spectra, metadata
 
 
@@ -394,7 +408,7 @@ print(explorer.available_sites)
 print(explorer.available_years)
 print(explorer._is_site_valid('DRIAMS-A'))
 
-_, df = load_driams_dataset(
+spectra, df = load_driams_dataset(
             explorer.root,
             'DRIAMS-A',
             '2015',
@@ -403,9 +417,9 @@ _, df = load_driams_dataset(
             'remove_if_all_missing'
 )
 
-print(df.to_numpy().shape)
-print(df.to_numpy().dtype)
-print(df.to_numpy()[0])
+dd = DRIAMSDataset(spectra, df)
+print(dd.n_label_avail)
+
 
 print(explorer._get_available_antibiotics('DRIAMS-A', '2015'))
 
