@@ -212,20 +212,20 @@ class DRIAMSDataset:
 
     @property
     def n_label_avail(self):
-        return self.y.loc[:, [col for col in self.y.columns if col not in
+        return self.y.loc[:, [c for c in self.y.columns if c not in
             _metadata_columns]].notna().sum(axis=0)
 
     # TODO implement
     @property
-    def class_ratio(self):
+    def class_ratio(self, antibiotic):
+        print(self.y.count())
         # return dict with label as key, and class fraction as value
         return fraq_dict
     
-    # TODO implement
     def to_numpy(self): 
         # return y as numpy array as imput for classification
-        y_numpy = self.y.to_numpy()
-        return y_numpy
+        return self.y.loc[:, [c for c in self.y.columns if c not in
+            _metadata_columns]].to_numpy()
 
 def load_driams_dataset(
     root,
@@ -436,11 +436,12 @@ spectra, df = load_driams_dataset(
 
 dd = DRIAMSDataset(spectra, df)
 print(dd.n_label_avail)
-print(dd.n_label_avail[0])
+print(dd.n_label_avail['Ciprofloxacin'])
+print(dd.to_numpy().shape)
 
+#print(dd.class_ratio)
 print(explorer._get_available_antibiotics('DRIAMS-A', '2015'))
 
-print(DRIAMSLabelEncoder().transform(df))
 
 from maldi_learn.vectorization import BinningVectorizer
 
@@ -448,3 +449,4 @@ bv = BinningVectorizer(1000, min_bin=2000, max_bin=20000)
 
 X = bv.fit_transform(spectra)
 print(X.shape)
+
