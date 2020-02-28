@@ -5,6 +5,7 @@ and loaders.
 
 import dotenv
 import os
+import itertools
 
 import numpy as np
 import pandas as pd
@@ -340,8 +341,7 @@ def load_driams_dataset(
         all_spectra[year] = spectra
         all_metadata[year] = metadata
 
-    # merge years
-    #
+    spectra, metadata = _merge_years(all_spectra, all_metadata)
     return DRIAMSDataset(spectra, metadata)
 
 
@@ -370,8 +370,14 @@ def _load_metadata(
                     na_values=['-'],
                     keep_default_na=True,
                 )
-
+    
     metadata = metadata.query('species == @species')
+
+    # ensures that all requested antibiotics are present in the
+    # dataframe. might be filled with nans if not present
+    metadata = metadata.reindex(columns=_metadata_columns + antibiotics)
+
+    # TODO raise warning if absent antibiotics are requested
 
     # TODO make cleaner
     metadata = metadata[_metadata_columns + antibiotics]
@@ -391,6 +397,22 @@ def _load_metadata(
         pass
 
     return metadata
+
+
+def _merge_years(all_spectra, all_metadata):
+
+    all_columns = set()
+    for df in all_metadata.values():
+        all_columns.update(df.columns) 
+    
+    for year in all_metadata.keys():
+        all_metadata[year] = all_metadata[year].reindex(columns=all_columns)
+    
+    metadata = pd.concat([df for df in all_metadata.values()])
+    spectra = [s for s in itertools.chain.from_iterable(all_spectra.values())]
+
+    assert sum(metadata.duplicated(subset=['code'])) == 0, 'Duplicated codes in different years.'
+    return spectra, metadata
 
 
 class DRIAMSLabelEncoder(LabelEncoder):
@@ -429,6 +451,7 @@ class DRIAMSLabelEncoder(LabelEncoder):
 explorer = DRIAMSDatasetExplorer('/Volumes/borgwardt/Data/DRIAMS')
 
 print(explorer._get_available_antibiotics('DRIAMS-A', '2015'))
+print(explorer._get_available_antibiotics('DRIAMS-A', '2017'))
 
 print(explorer.__dict__)
 print(explorer.available_sites)
@@ -438,9 +461,9 @@ print(explorer._is_site_valid('DRIAMS-A'))
 driams_dataset = load_driams_dataset(
             explorer.root,
             'DRIAMS-A',
-            '2015',
+            ['2015', '2017'],
             'Staphylococcus aureus',
-            ['Ciprofloxacin', 'Penicillin'],
+            ['Ciprofloxacin', 'Penicillin.ohne.Meningitis'],
             encoder=DRIAMSLabelEncoder(),
             handle_missing_resistance_measurements='remove_if_all_missing',
 )
