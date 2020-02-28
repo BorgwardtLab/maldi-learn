@@ -53,7 +53,10 @@ def clean_data(filename, outfile):
     
     ab_name_map = {
         'Amoxicillin...Clavulansaeure.bei.unkompliziertem.HWI': 'Amoxicillin-Clavulans.unkompl.HWI',
+        'Amoxicillin-Clavulansaeure.unkompl.HWI':
+        'Amoxicillin-Clavulansaeure_uncomplicated_HWI',
         'Ampicillin...Amoxicillin': 'Ampicillin-Amoxicillin',
+        'Amphotericin.B': 'Amphotericin-B',
         'Piperacillin...Tazobactam': 'Piperacillin-Tazobactam',
         'Amoxicillin...Clavulansaeure': 'Amoxicillin-Clavulanic acid',
         'Fusidinsaeure': 'Fusidic acid',
@@ -70,6 +73,7 @@ def clean_data(filename, outfile):
         'Fluconazol': 'Fluconazole',
         'Cefuroxim': 'Cefuroxime',
         'Tetracyclin': 'Tetracycline',
+        'Ticarcillin...Clavulansaeure': 'Ticarcillin-Clavulanic acid',
         'Ceftriaxon': 'Ceftriaxone',
         'Itraconazol': 'Itraconazole',
         'Cotrimoxazol': 'Trimethoprim-Sulfamethoxazole',
@@ -84,9 +88,14 @@ def clean_data(filename, outfile):
 
 
     # TODO assert no duplicates in code
+    print(len(df['code'].unique()))
+    print(df.shape)
 
     # TODO rename columns to standard antibiotic names
     df = df.rename(columns=ab_name_map)
+
+    # remove Dummy antibiotic
+    df = df.drop(['Dummy'])
 
     df.to_csv(outfile)
 
