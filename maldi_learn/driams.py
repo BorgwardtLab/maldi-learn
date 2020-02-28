@@ -1,7 +1,8 @@
-'''
-Main module for the DRIAMS dataset. Contains general exploration classes
-and loaders.
-'''
+"""Main module for the DRIAMS data set.
+
+This is the main module for the DRIAMS data set. It contains general
+exploration classes and loaders.
+"""
 
 import dotenv
 import os
@@ -17,8 +18,13 @@ from maldi_learn.preprocessing.generic import LabelEncoder
 # the root directory.
 dotenv.load_dotenv()
 
+# Root directory for the DRIAMS data set. Should contain additional
+# folders for each site and each year. The variable is just used as
+# a fall-back measure. It can be client-specified.
 DRIAMS_ROOT = os.getenv('DRIAMS_ROOT')
 
+# These are the columns that we consider to contain metadata for the
+# DRIAMS data set.
 _metadata_columns = ['code', 'bruker_organism_best_match', 'species']
 
 
