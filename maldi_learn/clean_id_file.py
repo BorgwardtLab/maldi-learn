@@ -50,6 +50,44 @@ def clean_data(filename, outfile):
         'Organism(best match)': 'bruker_organism_best_match',
     })
 
+    
+    ab_name_map = {
+        'Amoxicillin...Clavulansaeure.bei.unkompliziertem.HWI': 'Amoxicillin-Clavulans.unkompl.HWI',
+        'Ampicillin...Amoxicillin': 'Ampicillin-Amoxicillin',
+        'Piperacillin...Tazobactam': 'Piperacillin-Tazobactam',
+        'Amoxicillin...Clavulansaeure': 'Amoxicillin-Clavulanic acid',
+        'Fusidinsaeure': 'Fusidic acid',
+        'Ceftazidim.1': 'Ceftazidime',
+        'Ceftazidim.Avibactam': 'Ceftazidime-Avibactam',
+        'X5.Fluorocytosin': '5-Fluorocytosin',
+        'Fosfomycin.Trometamol': 'Fosfomycin-Trometamol',
+        'Ceftolozan...Tazobactam': 'Ceftolozane-Tazobactam',
+        'Cefepim': 'Cefepime',
+        'Posaconazol': 'Posaconazole',
+        'Tigecyclin': 'Tigecycline',
+        'Cefpodoxim': 'Cefpodoxime',
+        'Ceftobiprol': 'Ceftobiprole',
+        'Fluconazol': 'Fluconazole',
+        'Cefuroxim': 'Cefuroxime',
+        'Tetracyclin': 'Tetracycline',
+        'Ceftriaxon': 'Ceftriaxone',
+        'Itraconazol': 'Itraconazole',
+        'Cotrimoxazol': 'Trimethoprim-Sulfamethoxazole',
+        'Minocyclin': 'Minocycline',
+        'Voriconazol': 'Voriconazole',
+        'Metronidazol': 'Metronidazole',
+        'Aminoglykoside': 'Aminoglycosides',
+        'Chinolone': 'Quinolones',
+        'Doxycyclin': 'Doxycycline',
+        'Cefixim': 'Cefixime',
+    }
+
+
+    # TODO assert no duplicates in code
+
+    # TODO rename columns to standard antibiotic names
+    df = df.rename(columns=ab_name_map)
+
     df.to_csv(outfile)
 
 if __name__ == '__main__':
