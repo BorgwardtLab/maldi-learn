@@ -330,8 +330,7 @@ def load_driams_dataset(
         ) for f in spectra_files
     ]
 
-    # TODO doesn't return a DRIAMSDataset instance yet
-    return spectra, metadata
+    return DRIAMSDataset(spectra, metadata)
 
 
 def _load_metadata(
@@ -424,7 +423,7 @@ print(explorer.available_sites)
 print(explorer.available_years)
 print(explorer._is_site_valid('DRIAMS-A'))
 
-spectra, df = load_driams_dataset(
+driams_dataset = load_driams_dataset(
             explorer.root,
             'DRIAMS-A',
             '2015',
@@ -433,11 +432,9 @@ spectra, df = load_driams_dataset(
             encoder=DRIAMSLabelEncoder(),
             handle_missing_resistance_measurements='remove_if_all_missing',
 )
-
-dd = DRIAMSDataset(spectra, df)
-print(dd.n_label_avail)
-print(dd.n_label_avail['Ciprofloxacin'])
-print(dd.to_numpy().shape)
+print(driams_dataset.n_label_avail)
+print(driams_dataset.n_label_avail['Ciprofloxacin'])
+print(driams_dataset.to_numpy().shape)
 
 #print(dd.class_ratio)
 print(explorer._get_available_antibiotics('DRIAMS-A', '2015'))
@@ -447,6 +444,6 @@ from maldi_learn.vectorization import BinningVectorizer
 
 bv = BinningVectorizer(1000, min_bin=2000, max_bin=20000)
 
-X = bv.fit_transform(spectra)
+X = bv.fit_transform(driams_dataset.X)
 print(X.shape)
 
