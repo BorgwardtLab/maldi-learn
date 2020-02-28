@@ -29,7 +29,10 @@ _metadata_columns = ['code', 'bruker_organism_best_match', 'species']
 
 
 class DRIAMSDatasetExplorer:
+    """Explorer class for the DRIAMS data set."""
+
     def __init__(self, root=DRIAMS_ROOT):
+        """Create new instance based on a root data directory."""
         self.root = root
 
     def _get_available_sites(self):
@@ -39,25 +42,23 @@ class DRIAMSDatasetExplorer:
         return sites
 
     def _is_site_valid(self, site):
-        '''
+        """Check whether a specified site is valid.
+
         Checks whether a specified site is valid. A site is considered
         valid if there is at least one ID file and at least one
         spectrum, either pre-processed or raw.
 
         Parameters
         ----------
-
-            site:
-                Name of the site to query. The function will build the
-                necessary path to access the site automatically.
+        site:
+            Name of the site to query. The function will build the
+            necessary path to access the site automatically.
 
         Returns
         -------
-
         True if the site is valid according to the criterion specified
         above.
-        '''
-
+        """
         path = os.path.join(self.root, site)
 
         for _, dirs, _ in os.walk(path):
