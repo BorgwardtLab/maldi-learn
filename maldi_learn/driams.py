@@ -222,11 +222,13 @@ class DRIAMSDataset:
         print(self.y.count())
         # return dict with label as key, and class fraction as value
         return fraq_dict
-    
+   
+    # TODO make usable
     def to_numpy(self): 
         # return y as numpy array as imput for classification
-        return self.y.loc[:, [c for c in self.y.columns if c not in
+        y = self.y.loc[:, [c for c in self.y.columns if c not in
             _metadata_columns]].to_numpy()
+        return y.astype(int)
 
 def load_driams_dataset(
     root,
@@ -369,6 +371,7 @@ def _load_metadata(
                     low_memory=False,
                     na_values=['-'],
                     keep_default_na=True,
+                    nrows=400, #FIXME
                 )
     
     metadata = metadata.query('species == @species')
@@ -445,40 +448,4 @@ class DRIAMSLabelEncoder(LabelEncoder):
         # Ignore the metadata columns to ensure that these values will
         # not be replaced anywhere else.
         super().__init__(encodings, _metadata_columns)
-
-# HERE BE DRAGONS
-
-explorer = DRIAMSDatasetExplorer('/Volumes/borgwardt/Data/DRIAMS')
-
-print(explorer._get_available_antibiotics('DRIAMS-A', '2015'))
-print(explorer._get_available_antibiotics('DRIAMS-A', '2017'))
-
-print(explorer.__dict__)
-print(explorer.available_sites)
-print(explorer.available_years)
-print(explorer._is_site_valid('DRIAMS-A'))
-
-driams_dataset = load_driams_dataset(
-            explorer.root,
-            'DRIAMS-A',
-            ['2015', '2017'],
-            'Staphylococcus aureus',
-            ['Ciprofloxacin', 'Penicillin.ohne.Meningitis'],
-            encoder=DRIAMSLabelEncoder(),
-            handle_missing_resistance_measurements='remove_if_all_missing',
-)
-print(driams_dataset.n_label_avail)
-print(driams_dataset.n_label_avail['Ciprofloxacin'])
-print(driams_dataset.to_numpy().shape)
-
-#print(dd.class_ratio)
-print(explorer._get_available_antibiotics('DRIAMS-A', '2015'))
-
-
-from maldi_learn.vectorization import BinningVectorizer
-
-bv = BinningVectorizer(1000, min_bin=2000, max_bin=20000)
-
-X = bv.fit_transform(driams_dataset.X)
-print(X.shape)
 

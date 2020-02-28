@@ -7,6 +7,10 @@ from driams import DRIAMSLabelEncoder
 
 from driams import load_driams_dataset
 from maldi_learn.vectorization import BinningVectorizer
+from utilities import stratify_by_species_and_label
+
+from sklearn.linear_model import LogisticRegression
+from sklearn.metrics import accuracy_score
 
 explorer = DRIAMSDatasetExplorer('/Volumes/borgwardt/Data/DRIAMS')
 
@@ -22,9 +26,23 @@ driams_dataset = load_driams_dataset(
 )
 
 
-
-bv = BinningVectorizer(1000, min_bin=2000, max_bin=20000)
-
+# bin spectra
+bv = BinningVectorizer(100, min_bin=2000, max_bin=20000)
 X = bv.fit_transform(driams_dataset.X)
-print(X.shape)
+
+# train-test split
+index_train, index_test = stratify_by_species_and_label(driams_dataset.y, antibiotic='Ciprofloxacin')
+print(index_train)
+print(index_test)
+
+y = driams_dataset.y['Ciprofloxacin'].to_numpy().astype(int)
+print(y[index_train].dtype)
+print(X[index_train].shape)
+
+lr = LogisticRegression()
+lr.fit(X[index_train], y[index_train])
+y_pred = lr.predict(X[index_test])
+
+print(accuracy_score(y_pred, y[index_test]))
+
 
