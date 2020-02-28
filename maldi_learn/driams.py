@@ -374,7 +374,7 @@ def _load_metadata(
                     keep_default_na=True,
                     nrows=400, #FIXME
                 )
-    
+
     metadata = metadata.query('species == @species')
 
     # ensures that all requested antibiotics are present in the
@@ -382,15 +382,14 @@ def _load_metadata(
     metadata = metadata.reindex(columns=_metadata_columns + antibiotics)
 
     # TODO raise warning if absent antibiotics are requested
-
     # TODO make cleaner
+
     metadata = metadata[_metadata_columns + antibiotics]
     n_antibiotics = len(antibiotics)
 
     if encoder is not None:
         metadata = encoder.fit_transform(metadata)
 
-    # handle_missing_values
     if handle_missing_resistance_measurements == 'remove_if_all_missing':
         na_values = metadata[antibiotics].isna().sum(axis='columns')
         metadata = metadata[na_values != n_antibiotics]
@@ -407,15 +406,17 @@ def _merge_years(all_spectra, all_metadata):
 
     all_columns = set()
     for df in all_metadata.values():
-        all_columns.update(df.columns) 
-    
+        all_columns.update(df.columns)
+
     for year in all_metadata.keys():
         all_metadata[year] = all_metadata[year].reindex(columns=all_columns)
-    
+
     metadata = pd.concat([df for df in all_metadata.values()])
     spectra = [s for s in itertools.chain.from_iterable(all_spectra.values())]
 
-    assert sum(metadata.duplicated(subset=['code'])) == 0, 'Duplicated codes in different years.'
+    assert sum(metadata.duplicated(subset=['code'])) == 0, \
+        'Duplicated codes in different years.'
+
     return spectra, metadata
 
 
