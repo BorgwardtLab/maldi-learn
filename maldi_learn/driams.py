@@ -139,13 +139,13 @@ class DRIAMSDatasetExplorer:
         return years
 
     def _get_available_antibiotics(self, site, year):
-        '''
+        """Query a given site for the antibiotics available in a given year.
+
         Queries a given site for the antibiotics that are available in
         it and returns them.
 
         Parameters
         ----------
-
         site:
             Identifier of the site that is to be queried. The function
             will build the paths accordingly.
@@ -156,10 +156,8 @@ class DRIAMSDatasetExplorer:
 
         Returns
         -------
-
         List of antibiotic names, sorted in alphabetical order.
-        '''
-
+        """
         path = os.path.join(
                 self.root,
                 site,
@@ -189,28 +187,33 @@ class DRIAMSDatasetExplorer:
         }
 
     def available_years(self, site):
+        """Return available years for a given site."""
         return self._get_available_years(site)
 
     @property
     def available_sites(self):
+        """Return available sites in the data set."""
         return self._get_available_sites()
 
 
-
 class DRIAMSDataset:
-    
-    def __init__(self, X, y):
-        """
-        X: 
-            List of MaldiTofSpectra objects.
-        y:  
-            Metadata Pandas dataframe. Columns with antimicrobial
-            information are indicated by capitalized header.
+    """DRIAMS data set."""
 
+    def __init__(self, X, y):
+        """Create new DRIAMS data set.
+
+        Parameters
+        ----------
+        X:
+            List of `MaldiTofSpectra` objects.
+        y:
+            Metadata data frame (`pandas.DataFrame`). Columns with
+            antimicrobial information are indicated by capitalized
+            header.
         """
         # checks if input is valid
         assert len(X) == y.shape[0]
-        
+
         self.X = X
         self.y = y
 
@@ -218,10 +221,10 @@ class DRIAMSDataset:
     def is_multitask(self):
         n_cols = [c for c in self.y.columns if c not in _metadata_columns]
         return n_cols != 1
-    
+
     @property
     def n_samples(self):
-        return self.y.shape[0] 
+        return self.y.shape[0]
 
     @property
     def n_label_avail(self):
@@ -234,7 +237,7 @@ class DRIAMSDataset:
         print(self.y.count())
         # return dict with label as key, and class fraction as value
         return fraq_dict
-   
+
     # TODO make usable
     def to_numpy(self): 
         # return y as numpy array as imput for classification
@@ -462,4 +465,3 @@ class DRIAMSLabelEncoder(LabelEncoder):
         # Ignore the metadata columns to ensure that these values will
         # not be replaced anywhere else.
         super().__init__(encodings, _metadata_columns)
-
