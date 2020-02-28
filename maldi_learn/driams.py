@@ -230,6 +230,7 @@ class DRIAMSDataset:
             _metadata_columns]].to_numpy()
         return y.astype(int)
 
+
 def load_driams_dataset(
     root,
     site,
@@ -253,15 +254,16 @@ def load_driams_dataset(
 
     Parameters
     ----------
-
     root:
         Root path to the DRIAMS dataset folder.
 
     site:
         Identifier of a site, such as `DRIAMS-A`.
 
-    year:
-        Identifier for the year, such as `2015`.
+    years:
+        Identifier for the year, such as `2015`. Can be either a `list`
+        of strings or a single `str`, in which case only one year will
+        be loaded.
 
     species:
         Identifier for the species, such as *Staphylococcus aureus*.
@@ -298,7 +300,6 @@ def load_driams_dataset(
 
     Returns
     -------
-
     Instance of `DRIAMSDataset`, containing all loaded spectra.
     """
     if load_raw:
