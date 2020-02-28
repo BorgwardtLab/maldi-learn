@@ -95,7 +95,7 @@ def clean_data(filename, outfile):
     df = df.rename(columns=ab_name_map)
 
     # remove Dummy antibiotic
-    df = df.drop(['Dummy'])
+    if 'Dummy' in list(df.columns): df = df.drop(columns='Dummy')
 
     df.to_csv(outfile)
 
