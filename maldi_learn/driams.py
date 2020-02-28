@@ -82,16 +82,21 @@ class DRIAMSDatasetExplorer:
         return True
 
     def _check_id_files(self, id_directory):
+        """Check ID files for consistency and correctness.
 
+        Checks the ID files of the DRIAMS data set for consistency and
+        correctness. Makes sure that all files are properly referenced.
+        """
         n_dirs = 0
         filenames = []
 
         for root, dirs, files in os.walk(id_directory):
             n_dirs += len(dirs)
 
-            filenames.extend([os.path.join(root, f)
-                for f in files if not f.startswith('.')]
-            )
+            filenames.extend([
+                os.path.join(root, f)
+                for f in files if not f.startswith('.')
+            ])
 
         # TODO: raise warning; each directory must contain a single file
         # only
