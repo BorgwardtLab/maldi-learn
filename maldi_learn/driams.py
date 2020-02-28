@@ -230,7 +230,7 @@ class DRIAMSDataset:
 def load_driams_dataset(
     root,
     site,
-    year,
+    years,
     species,
     antibiotics,
     encoder=None,
@@ -303,33 +303,45 @@ def load_driams_dataset(
     else:
         spectra_type = 'preprocessed'
 
-    path_X = os.path.join(root, site, spectra_type, year)
-    id_file = os.path.join(root, site, 'id', year, f'{year}_clean.csv')
+    if type(years) is not list:
+        years = [years]
 
-    # Metadata contains all information that we have about the
-    # individual spectra and the selected antibiotics.
-    metadata = _load_metadata(
-        id_file,
-        species,
-        antibiotics,
-        encoder,
-        handle_missing_resistance_measurements
-    )
+    all_spectra = {}
+    all_metadata = {}
 
-    # The codes are used to uniquely identify the spectra that we can
-    # load. They are required for matching files and metadata.
-    codes = metadata.code
+    for year in years:
+        path_X = os.path.join(root, site, spectra_type, year)
+        id_file = os.path.join(root, site, 'id', year, f'{year}_clean.csv')
 
-    spectra_files = [
-        os.path.join(path_X, f'{code}.txt') for code in codes
-    ]
+        # Metadata contains all information that we have about the
+        # individual spectra and the selected antibiotics.
+        metadata = _load_metadata(
+            id_file,
+            species,
+            antibiotics,
+            encoder,
+            handle_missing_resistance_measurements
+        )
 
-    spectra = [
-        MaldiTofSpectrum(
-            pd.read_csv(f, sep=' ', comment='#', engine='c').values
-        ) for f in spectra_files
-    ]
+        # The codes are used to uniquely identify the spectra that we can
+        # load. They are required for matching files and metadata.
+        codes = metadata.code
 
+        spectra_files = [
+            os.path.join(path_X, f'{code}.txt') for code in codes
+        ]
+
+        spectra = [
+            MaldiTofSpectrum(
+                pd.read_csv(f, sep=' ', comment='#', engine='c').values
+            ) for f in spectra_files
+        ]
+
+        all_spectra[year] = spectra
+        all_metadata[year] = metadata
+
+    # merge years
+    #
     return DRIAMSDataset(spectra, metadata)
 
 
