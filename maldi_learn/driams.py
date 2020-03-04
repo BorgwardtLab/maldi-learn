@@ -238,7 +238,6 @@ class DRIAMSDataset:
         # return dict with label as key, and class fraction as value
         return fraq_dict
 
-    # TODO make usable
     def to_numpy(self, antibiotic): 
         # return y as numpy array as imput for classification
         y = self.y.loc[:, [c for c in self.y.columns if c not in
@@ -327,6 +326,10 @@ def load_driams_dataset(
 
     all_spectra = {}
     all_metadata = {}
+
+    # TODO handle overlapping years
+
+        
 
     for year in years:
         path_X = os.path.join(root, site, spectra_type, year)
