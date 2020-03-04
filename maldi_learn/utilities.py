@@ -14,7 +14,6 @@ def stratify_by_species_and_label(y, antibiotic, test_size=0.2, random_state=123
     # construct class and species vector for stratification
     le = LabelEncoder()
 
-    # TODO change to species eventually
     species_transform = le.fit_transform(y.species)
     labels = y[antibiotic].values
     

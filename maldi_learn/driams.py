@@ -25,7 +25,7 @@ DRIAMS_ROOT = os.getenv('DRIAMS_ROOT')
 
 # These are the columns that we consider to contain metadata for the
 # DRIAMS data set.
-_metadata_columns = ['code', 'bruker_organism_best_match', 'species']
+_metadata_columns = ['code', 'species', 'laboratory_species']
 
 
 class DRIAMSDatasetExplorer:

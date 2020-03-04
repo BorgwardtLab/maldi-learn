@@ -46,8 +46,8 @@ def clean_data(filename, outfile):
     print(f'ID file final shape: {df.shape}')
 
     df = df.rename(columns={
-        'KEIM': 'species',
-        'Organism(best match)': 'bruker_organism_best_match',
+        'KEIM': 'laboratory_species',
+        'Organism(best match)': 'species',
     })
 
     
