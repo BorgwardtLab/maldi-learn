@@ -387,7 +387,7 @@ def _load_metadata(
                     low_memory=False,
                     na_values=['-'],
                     keep_default_na=True,
-                    nrows=400, #FIXME
+                    nrows=400,  # FIXME
                 )
 
     metadata = metadata.query('species == @species')
