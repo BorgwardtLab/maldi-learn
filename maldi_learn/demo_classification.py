@@ -24,7 +24,7 @@ explorer = DRIAMSDatasetExplorer(DRIAMS_ROOT)
 driams_dataset = load_driams_dataset(
             explorer.root,
             'DRIAMS-A',
-            ['2018', '2017'],
+            ['2015', '2017'],
             'Staphylococcus aureus',
             ['Ciprofloxacin', 'Penicillin.ohne.Meningitis'],
             encoder=DRIAMSLabelEncoder(),
