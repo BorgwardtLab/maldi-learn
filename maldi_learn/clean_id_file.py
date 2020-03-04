@@ -84,14 +84,32 @@ def clean_data(filename, outfile):
         'Chinolone': 'Quinolones',
         'Doxycyclin': 'Doxycycline',
         'Cefixim': 'Cefixime',
+        'Meropenem.bei.Meningitis': 'Meropenem_with_meningitis',
+        'Meropenem.bei.Pneumonie': 'Meropenem_with_pneumonia',
+        'Meropenem.ohne.Meningitis': 'Meropenem_without_meningitis',
+        'Isoniazid.0.1.mg.l': 'Isoniazid_.1mg-l',
+        'Isoniazid.0.4.mg.l': 'Isoniazid_.4mg-l',
+        'Ethambutol.5.0.mg.l': 'Ethambutol_5mg-l',
+        'Pyrazinamid.100.0.mg.l': 'Pyrazinamid_100mg-l',
+        'Streptomycin.1.0.mg.l': 'Streptomycin_1mg-l',
+        'Rifampicin.1.0.mg.l': 'Rifampicin_1mg-l',
+        'Gentamicin.High.level': 'Gentamicin_high_level',
+        'Penicillin.bei.Endokarditis': 'Penicillin_with_endokarditis',
+        'Penicillin.bei.Meningitis': 'Penicillin_with_meningitis', 
+        'Penicillin.bei.Pneumonie': 'Penicillin_with_pneumonia', 
+        'Penicillin.bei.anderen.Infekten': 'Penicillin_other_infections_present', 
+        'Penicillin.ohne.Endokarditis': 'Penicillin_without_endokarditis',
+        # TODO
+        'Vancomycin.GRD': 'Vancomycin.GRD',
+        'Cefepim.1': 'Cefepim.1',
+        'Cefoxitin.Screen': 'Cefoxitin.Screen',
     }
 
 
-    # TODO assert no duplicates in code
-    print(len(df['code'].unique()))
-    print(df.shape)
+    # assert no duplicates in code
+    assert len(df['code'].unique()) == df.shape[0], 'codes not unique.'
 
-    # TODO rename columns to standard antibiotic names
+    # rename columns to standard antibiotic names
     df = df.rename(columns=ab_name_map)
 
     # remove Dummy antibiotic
