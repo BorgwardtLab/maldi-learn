@@ -1,6 +1,9 @@
 """
 """
 
+import dotenv
+import os
+
 from driams import DRIAMSDatasetExplorer
 from driams import DRIAMSDataset
 from driams import DRIAMSLabelEncoder
@@ -12,13 +15,16 @@ from utilities import stratify_by_species_and_label
 from sklearn.linear_model import LogisticRegression
 from sklearn.metrics import accuracy_score
 
-explorer = DRIAMSDatasetExplorer('/Volumes/borgwardt/Data/DRIAMS')
+dotenv.load_dotenv()
+DRIAMS_ROOT = os.getenv('DRIAMS_ROOT')
+       
+explorer = DRIAMSDatasetExplorer(DRIAMS_ROOT)
 
 
 driams_dataset = load_driams_dataset(
             explorer.root,
             'DRIAMS-A',
-            ['2015', '2017'],
+            ['2018', '2017'],
             'Staphylococcus aureus',
             ['Ciprofloxacin', 'Penicillin.ohne.Meningitis'],
             encoder=DRIAMSLabelEncoder(),
