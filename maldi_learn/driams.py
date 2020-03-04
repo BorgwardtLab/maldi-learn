@@ -324,6 +324,9 @@ def load_driams_dataset(
         os.path.join(path_X, f'{code}.txt') for code in codes
     ]
 
+    # TODO what happends if not every code finds a spectrum
+
+
     spectra = [
         MaldiTofSpectrum(
             pd.read_csv(f, sep=' ', comment='#', engine='c').values
