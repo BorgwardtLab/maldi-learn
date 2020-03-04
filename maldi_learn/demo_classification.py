@@ -41,7 +41,7 @@ index_train, index_test = stratify_by_species_and_label(driams_dataset.y, antibi
 print(index_train)
 print(index_test)
 
-y = driams_dataset.y['Ciprofloxacin'].to_numpy().astype(int)
+y = driams_dataset.to_numpy('Ciprofloxacin')
 print(y[index_train].dtype)
 print(X[index_train].shape)
 

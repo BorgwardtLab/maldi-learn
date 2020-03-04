@@ -239,11 +239,11 @@ class DRIAMSDataset:
         return fraq_dict
 
     # TODO make usable
-    def to_numpy(self): 
+    def to_numpy(self, antibiotic): 
         # return y as numpy array as imput for classification
         y = self.y.loc[:, [c for c in self.y.columns if c not in
-            _metadata_columns]].to_numpy()
-        return y.astype(int)
+            _metadata_columns]]
+        return y[antibiotic].to_numpy().astype(int)
 
 
 def load_driams_dataset(
