@@ -365,6 +365,12 @@ def load_driams_dataset(
             ) for f in spectra_files
         ]
 
+        problematic_codes = [
+            c for c, s in zip(codes, spectra) if np.isnan(spectrum).any()
+        ]
+
+        print(problematic_codes)
+
         all_spectra[year] = spectra
         all_metadata[year] = metadata
 
