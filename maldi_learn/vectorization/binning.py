@@ -4,8 +4,6 @@ import numpy as np
 from sklearn.base import BaseEstimator
 from sklearn.base import TransformerMixin
 
-from numba import jit
-
 
 class BinningVectorizer(BaseEstimator, TransformerMixin):
     """Vectorizer based on binning MALDI-TOF spectra.
@@ -42,7 +40,6 @@ class BinningVectorizer(BaseEstimator, TransformerMixin):
             combined_times, self.n_bins, range=(min_range, max_range))
         return self
 
-    @jit(forceobj=True)
     def transform(self, X):
         """Transform list of spectra into vector using bins.
 
