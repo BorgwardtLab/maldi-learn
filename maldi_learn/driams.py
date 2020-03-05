@@ -348,7 +348,7 @@ def load_driams_dataset(
             antibiotics,
             encoder,
             handle_missing_resistance_measurements,
-            kwargs,
+            **kwargs,
         )
 
         # The codes are used to uniquely identify the spectra that we can
