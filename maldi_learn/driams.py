@@ -366,7 +366,7 @@ def load_driams_dataset(
         ]
 
         problematic_codes = [
-            c for c, s in zip(codes, spectra) if np.isnan(spectrum).any()
+            c for c, s in zip(codes, spectra) if np.isnan(s).any()
         ]
 
         print(problematic_codes)
