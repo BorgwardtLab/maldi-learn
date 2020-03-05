@@ -37,6 +37,7 @@ class BinningVectorizer(BaseEstimator, TransformerMixin):
         self.min_bin = min_bin
         self.max_bin = max_bin
         self.bin_edges_ = None
+        self.n_jobs = n_jobs
 
     def fit(self, X, y=None):
         """Fit transformer, derives bins used to bin spectra."""
@@ -59,7 +60,13 @@ class BinningVectorizer(BaseEstimator, TransformerMixin):
             2D numpy array with shape [n_instances x n_bins]
 
         """
-        output = [self._transform(spectrum) for spectrum in X]
+        if self.n_jobs is None:
+            output = [self._transform(spectrum) for spectrum in X]
+        else:
+            output = joblib.Parallel(n_jobs=self.n_jobs)(
+                joblib.delayed(self._transform)(s) for s in X
+            )
+
         return np.stack(output, axis=0)
 
     def _transform(self, spectrum):
