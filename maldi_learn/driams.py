@@ -7,6 +7,7 @@ exploration classes and loaders.
 import dotenv
 import os
 import itertools
+import warnings
 
 import numpy as np
 import pandas as pd
@@ -369,7 +370,8 @@ def load_driams_dataset(
             c for c, s in zip(codes, spectra) if np.isnan(s).any()
         ]
 
-        print(problematic_codes)
+        if problematic_codes:
+            warnings.warn(f'Found problematic codes: {problematic_codes}')
 
         all_spectra[year] = spectra
         all_metadata[year] = metadata
