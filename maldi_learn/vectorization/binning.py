@@ -42,7 +42,7 @@ class BinningVectorizer(BaseEstimator, TransformerMixin):
             combined_times, self.n_bins, range=(min_range, max_range))
         return self
 
-    @jit
+    @jit(forceobj=True)
     def transform(self, X):
         """Transform list of spectra into vector using bins.
 
