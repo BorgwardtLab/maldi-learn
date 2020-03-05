@@ -254,7 +254,8 @@ def load_driams_dataset(
     antibiotics,
     encoder=None,
     handle_missing_resistance_measurements='remove_if_all_missing',
-    load_raw=False
+    load_raw=False,
+    **kwargs,
 ):
     """Load DRIAMS data set for a specific site and specific year.
 
@@ -313,6 +314,13 @@ def load_driams_dataset(
         and merely changes the resulting spectra. If not set, loads
         the pre-processed spectra instead.
 
+    kwargs:
+        Optional keyword arguments for changing the downstream behaviour
+        of some functions. At present, the following keys are supported:
+
+            - `nrows`: specifies number of rows to read from the data
+              frame; reducing this is useful for debugging
+
     Returns
     -------
     Instance of `DRIAMSDataset`, containing all loaded spectra.
@@ -339,7 +347,8 @@ def load_driams_dataset(
             species,
             antibiotics,
             encoder,
-            handle_missing_resistance_measurements
+            handle_missing_resistance_measurements,
+            kwargs,
         )
 
         # The codes are used to uniquely identify the spectra that we can
@@ -368,7 +377,8 @@ def _load_metadata(
     species,
     antibiotics,
     encoder,
-    handle_missing_resistance_measurements
+    handle_missing_resistance_measurements,
+    **kwargs,
 ):
 
     # Ensures that we always get a list of antibiotics for subsequent
@@ -387,7 +397,7 @@ def _load_metadata(
                     low_memory=False,
                     na_values=['-'],
                     keep_default_na=True,
-                    nrows=400,  # FIXME
+                    nrows=kwargs.get('nrows', None),
                 )
 
     metadata = metadata.query('species == @species')
