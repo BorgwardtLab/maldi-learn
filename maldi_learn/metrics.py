@@ -10,7 +10,7 @@ major_error_score:
 
 from sklearn.metrics import confusion_matrix
 from sklearn.metrics import auc
-from sklearn.metrics.ranking import binary_clf_curve
+from sklearn.metrics.ranking import _binary_clf_curve
 
 
 def very_major_error_score(y_true, y_pred, labels=[0,1]):
