@@ -66,7 +66,10 @@ def stratify_by_species_and_label(
     species_transform = le.fit_transform(y.species)
     labels = y[antibiotic].values
 
-    # Creates the *combined* label required for the stratification.
+    # Creates the *combined* label required for the stratification. The
+    # first dimension of the vector is the encoded species, while the
+    # second dimension is the (binary) label calculated from information
+    # about resistance & susceptibility.
     stratify = np.vstack((species_transform, labels)).T
 
     train_index, test_index = train_test_split(
