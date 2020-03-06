@@ -10,6 +10,8 @@ import os
 
 from driams import load_spectrum
 
+from tqdm import tqdm
+
 
 def _has_no_nan(spectrum):
     # The spectrum, which is a data frame, must *not* contain any NaN
@@ -37,7 +39,7 @@ if __name__ == '__main__':
         ]
 
         spectra = [
-            load_spectrum(fn) for fn in filenames
+            load_spectrum(fn) for fn in tqdm(filenames, desc='File')
         ]
 
         for spectrum, filename in zip(spectra, filenames):
