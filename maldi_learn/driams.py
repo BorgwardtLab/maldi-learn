@@ -336,10 +336,6 @@ def load_driams_dataset(
     all_spectra = {}
     all_metadata = {}
 
-    # TODO handle overlapping years
-
-        
-
     for year in years:
         path_X = os.path.join(root, site, spectra_type, year)
         id_file = os.path.join(root, site, 'id', year, f'{year}_clean.csv')
