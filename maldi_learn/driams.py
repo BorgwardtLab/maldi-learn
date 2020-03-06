@@ -307,7 +307,8 @@ def load_driams_dataset(
         be loaded.
 
     species:
-        Identifier for the species, such as *Staphylococcus aureus*.
+        Identifier for the species, such as *Staphylococcus aureus*. If
+        set to `*`, returns all species, thus performing no filtering.
 
     antibiotics:
         Identifier for the antibiotics to use, such as *Ciprofloxacin*.
@@ -430,7 +431,9 @@ def _load_metadata(
                     nrows=kwargs.get('nrows', None),
                 )
 
-    metadata = metadata.query('species == @species')
+    # Perform no species filtering if *all* species are requested.
+    if species != '*':
+        metadata = metadata.query('species == @species')
 
     # ensures that all requested antibiotics are present in the
     # dataframe. might be filled with nans if not present
