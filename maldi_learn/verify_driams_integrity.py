@@ -38,11 +38,9 @@ if __name__ == '__main__':
             fn for fn in filenames if os.path.splitext(fn)[1] == '.txt'
         ]
 
-        spectra = [
-            load_spectrum(fn) for fn in tqdm(filenames, desc='File')
-        ]
+        for filename in tqdm(filenames, desc='Spectrum'):
+            spectrum = load_spectrum(filename)
 
-        for spectrum, filename in zip(spectra, filenames):
             code = os.path.basename(filename)
             code = os.path.splitext(code)[0]
 
