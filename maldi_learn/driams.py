@@ -246,6 +246,31 @@ class DRIAMSDataset:
         return y[antibiotic].to_numpy().astype(int)
 
 
+def load_spectrum(filename):
+    """Load DRIAMS MALDI-TOF spectrum.
+
+    This function encapsulates loading a MALDI-TOF spectrum from the
+    DRIAMS data set. It should be used in lieu of any raw calls that
+    aim to load a spectrum.
+
+    Parameters
+    ----------
+    filename : str
+        Filename from which to load the spectrum.
+
+    Returns
+    -------
+    Instance of `MaldiTofSpectrum` class, containing the spectrum.
+    """
+    return MaldiTofSpectrum(
+                pd.read_csv(
+                    filename,
+                    sep=' ',
+                    comment='#',
+                    engine='c').values
+            )
+
+
 def load_driams_dataset(
     root,
     site,
@@ -360,9 +385,7 @@ def load_driams_dataset(
         ]
 
         spectra = [
-            MaldiTofSpectrum(
-                pd.read_csv(f, sep=' ', comment='#', engine='c').values
-            ) for f in spectra_files
+            load_spectrum(f) for f in spectra_files
         ]
 
         problematic_codes = [
