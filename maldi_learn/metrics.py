@@ -9,6 +9,9 @@ major_error_score:
 """
 
 from sklearn.metrics import confusion_matrix
+from sklearn.metrics import auc
+from sklearn.metrics.ranking import binary_clf_curve
+
 
 def very_major_error_score(y_true, y_pred, labels=[0,1]):
     TN, FP, FN, TP = confusion_matrix(y_true, y_pred, labels=labels).ravel()
@@ -17,3 +20,15 @@ def very_major_error_score(y_true, y_pred, labels=[0,1]):
 def major_error_score(y_true, y_pred, labels=[0,1]):
     TN, FP, FN, TP = confusion_matrix(y_true, y_pred, labels=labels).ravel()
     return FN / float(FN+TP)
+
+
+
+def vme_curve(y_true, y_pred, pos_label=1, sample_weight=None):
+    fps, tps, thresholds = _binary_clf_curve(y_true, y_pred, pos_label=pos_label, sample_weight=sample_weight)
+    vme = fps / fps[-1]
+    me =  (tps[-1] -  tps) / tps[-1]
+    return vme, 1-me, thresholds
+
+def vme_auc_score(y_true, y_pred, pos_label=1, sample_weight=None):
+    vme, me_inv, thresholds = vme_curve(y_true, y_pred, pos_label=1, sample_weight=None)
+    return auc(vme, me_inv)
