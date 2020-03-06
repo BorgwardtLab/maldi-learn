@@ -72,11 +72,46 @@ def stratify_by_species_and_label(
     # about resistance & susceptibility.
     stratify = np.vstack((species_transform, labels)).T
 
+    # TODO: make this behaviour configurable; currently, we are always
+    # removing all the indices that do not work.
+
+    _, indices, counts = np.unique(
+        stratify,
+        axis=0,
+        return_index=True,
+        return_counts=True
+    )
+
+    # Get indices of all elements that appear an insufficient number of
+    # times to be used in the stratification.
+    invalid_indices = indices[counts < 2]
+
+    # Replace all of them by a 'fake' class whose numbers are guaranteed
+    # *not* to occur in the data set (because labels are encoded from 0,
+    # and the binary label is either 0 or 1).
+    stratify[invalid_indices, :] = [-1, -1]
+
     train_index, test_index = train_test_split(
         range(n_samples),
         test_size=test_size,
         stratify=stratify,
         random_state=random_state
     )
+
+    train_index = np.asarray(train_index)
+    train_index = train_index[
+                    np.isin(train_index,
+                            invalid_indices,
+                            assume_unique=True,
+                            invert=True)
+                ]
+
+    test_index = np.asarray(test_index)
+    test_index = test_index[
+                    np.isin(test_index,
+                            invalid_indices,
+                            assume_unique=True,
+                            invert=True)
+               ]
 
     return train_index, test_index
