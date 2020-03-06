@@ -8,6 +8,8 @@ should fail.
 import argparse
 import os
 
+import numpy as np
+
 from driams import load_spectrum
 
 from tqdm import tqdm
@@ -16,7 +18,7 @@ from tqdm import tqdm
 def _has_no_nan(spectrum):
     # The spectrum, which is a data frame, must *not* contain any NaN
     # values.
-    return not spectrum.isna().values.any()
+    return not np.isnan(spectrum).any()
 
 
 if __name__ == '__main__':
@@ -38,6 +40,9 @@ if __name__ == '__main__':
             fn for fn in filenames if os.path.splitext(fn)[1] == '.txt'
         ]
 
+        if not filenames:
+            continue
+
         for filename in tqdm(filenames, desc='Spectrum'):
             spectrum = load_spectrum(filename)
 
@@ -46,4 +51,4 @@ if __name__ == '__main__':
 
             # TODO: update this once more checks are present
             if not _has_no_nan(spectrum):
-                print(code)
+                tqdm.write(code)
