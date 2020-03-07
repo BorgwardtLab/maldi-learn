@@ -9,11 +9,15 @@ import argparse
 import dotenv
 import os
 
+import pandas as pd
+
 from driams import DRIAMSDatasetExplorer
 from driams import DRIAMSLabelEncoder
 from driams import load_driams_dataset
 
 from maldi_learn.vectorization import BinningVectorizer
+
+from tqdm import tqdm
 
 dotenv.load_dotenv()
 DRIAMS_ROOT = os.getenv('DRIAMS_ROOT')
@@ -51,21 +55,63 @@ if __name__ == '__main__':
     explorer = DRIAMSDatasetExplorer(DRIAMS_ROOT)
     antibiotics = explorer.available_antibiotics(args.site)
 
-    driams_dataset = load_driams_dataset(
+    # Process each year separately, because that simplifies assigning
+    # the output files.
+    for year in tqdm(args.years, desc='Year'):
+        driams_dataset = load_driams_dataset(
+                explorer.root,
+                args.site,
+                year,
+                '*',  # Load all species; we do *not* want to filter anything
+                antibiotics,
+                encoder=DRIAMSLabelEncoder(),
+                handle_missing_resistance_measurements='remove_if_all_missing'
+        )
+
+        bv = BinningVectorizer(
+                args.bins,
+                min_bin=2000,
+                max_bin=20000,
+                n_jobs=-1  # Use all available cores to perform the processing
+        )
+
+        X = bv.fit_transform(driams_dataset.X)
+
+        # Follows the same hierarchy as the other data sets. For
+        # example, if site DRIAMS-A is being pre-processed, each
+        # file will be stored in
+        #
+        #       $ROOT/DRIAMS-A/binned_$BINS/$YEAR
+        #
+        # for $BINS bins in the histogram. This makes re-loading
+        # pre-processed spectra ridiculously easy.
+        output_directory = os.path.join(
             explorer.root,
             args.site,
-            args.years,
-            '*',  # Load all species; we do *not* want to filter anything
-            antibiotics,
-            encoder=DRIAMSLabelEncoder(),
-            handle_missing_resistance_measurements='remove_if_all_missing'
-    )
+            f'binned_{args.bins}',
+            year
+        )
 
-    bv = BinningVectorizer(
-            args.bins,
-            min_bin=2000,
-            max_bin=20000,
-            n_jobs=-1  # Use all available cores to perform the processing
-    )
+        os.makedirs(output_directory, exist_ok=True)
 
-    X = bv.fit_transform(driams_dataset.X)
+        codes = driams_dataset.y['code'].values
+
+        for spectrum, code in zip(X, codes):
+            output_file = os.path.join(
+                output_directory,
+                f'{code}.txt'
+            )
+
+            # Might change this behaviour in the future, but for now,
+            # let's play it safe and not overwrite anything.
+            if os.path.exists(output_file):
+                continue
+
+            # Turn the spectrum vector into a data frame that tries to
+            # at least partially maintain a description. This also has
+            # the advantage of automatically generating an index.
+            df = pd.DataFrame({'binned_intensity': spectrum})
+            df.index.name = 'bin_index'
+
+            # Use a proper separator to be compatible with our reader.
+            df.to_csv(output_file, sep=' ')
