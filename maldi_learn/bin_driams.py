@@ -63,7 +63,7 @@ if __name__ == '__main__':
                 args.site,
                 year,
                 '*',  # Load all species; we do *not* want to filter anything
-                antibiotics,
+                antibiotics[year],
                 encoder=DRIAMSLabelEncoder(),
                 handle_missing_resistance_measurements='remove_if_all_missing'
         )
