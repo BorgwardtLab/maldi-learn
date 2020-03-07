@@ -41,7 +41,7 @@ if __name__ == '__main__':
         help='Years to pre-process'
     )
 
-    parser.add_args(
+    parser.add_argument(
         '-b', '--bins',
         type=int,
         required=True,
