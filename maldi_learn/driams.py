@@ -167,7 +167,7 @@ class DRIAMSDatasetExplorer:
                 f'{year}_clean.csv'
         )
 
-        df = pd.read_csv(path)
+        df = pd.read_csv(path, low_memory=False)
         antibiotics = [c for c in df.columns if c[0].isupper()]
         antibiotics = [a for a in antibiotics if 'Unnamed' not in a]
 
