@@ -68,7 +68,6 @@ def stratify_by_species_and_label(
     the whole data set.
     """
     _check_y(y)
-    n_samples = y.shape[0]
 
     # First, get the valid indices: valid indices are indices that
     # correspond to a finite label in the data. Since infinite, or
@@ -115,15 +114,89 @@ def stratify_by_species_and_label(
 
         unique = unique[counts >= 2]
 
-        valid_indices = [
+        # Collect indices corresponding to all valid combinations. This
+        # is relative to the stratification vector, though, so to get a
+        # global lookup, we have to subset `valid_indices`.
+        idx_ = [
             (stratify == u).all(axis=1).nonzero()[0].tolist() for u in unique
         ]
 
-        valid_indices = sorted(itertools.chain.from_iterable(valid_indices))
+        idx_ = sorted(itertools.chain.from_iterable(idx_))
+        valid_indices = valid_indices[idx_]
 
         labels_ = labels[valid_indices].astype('int')
         species_encoded_ = species_encoded[valid_indices].astype('int')
         stratify = np.vstack((species_encoded_, labels_)).T
+
+    train_index, test_index = train_test_split(
+        valid_indices,
+        test_size=test_size,
+        stratify=stratify,
+        random_state=random_state
+    )
+
+    # Ensures that the reported indices can be easily used for subset
+    # creation later on.
+    train_index = np.asarray(train_index)
+    test_index = np.asarray(test_index)
+
+    return train_index, test_index
+
+
+def stratify_by_species_and_label_pd(
+    y,
+    antibiotic,
+    test_size=0.2,
+    remove_invalid=True,
+    random_state=123
+):
+    """Stratification by species and antibiotic label.
+
+    This function performs a stratified train--test split, taking into
+    account species *and* label information.
+
+    Parameters
+    ----------
+    y : pandas.DataFrame
+        Label data frame containing information about the species, the
+        antibiotics, and other (optional) information, which is ignored
+        by this function.
+
+    antibiotic : str
+        Specifies the antibiotic for the stratification. This must be
+        a valid column in `y`.
+
+    test_size: float
+        Specifies the size of the test data set returned by the split.
+        This function cannot guarantee that a specific test size will
+        lead to a valid split. In this case, it will fail.
+
+    random_state:
+        Specifies the random state to use for the split.
+
+    Returns
+    -------
+    Tuple of train and test indices, each one of them being an
+    `np.ndarray`. If `remove_invalid` has been set, the totality
+    of all train and test indices does not necessarily add up to
+    the whole data set.
+    """
+    _check_y(y)
+
+    df = y.groupby([antibiotic, 'species'])
+    df = df.size().reset_index().rename(columns={0: 'count'})
+
+    df = df[df['count'] >= 2]
+    df = df[[antibiotic, 'species']]
+
+    A, S = df[antibiotic].values, df['species'].values
+
+    y['antibiotic'] = y[antibiotic]
+
+    for a, s in zip(A, S):
+        print(y.query('species == @s and `antibiotic` == @a').index.values)
+
+    # TODO: flesh this out further
 
     train_index, test_index = train_test_split(
         valid_indices,
