@@ -1,25 +1,26 @@
-"""
+"""Simple classification example.
+
+This script demonstrates how to perform classification using
+`maldi-learn` and the DRIAMS data set.
 """
 
 import dotenv
 import os
 
 from maldi_learn.driams import DRIAMSDatasetExplorer
-from maldi_learn.driams import DRIAMSDataset
 from maldi_learn.driams import DRIAMSLabelEncoder
-
 from maldi_learn.driams import load_driams_dataset
-from maldi_learn.vectorization import BinningVectorizer
+
 from maldi_learn.utilities import stratify_by_species_and_label
+from maldi_learn.vectorization import BinningVectorizer
 
 from sklearn.linear_model import LogisticRegression
 from sklearn.metrics import accuracy_score
 
 dotenv.load_dotenv()
 DRIAMS_ROOT = os.getenv('DRIAMS_ROOT')
-       
-explorer = DRIAMSDatasetExplorer(DRIAMS_ROOT)
 
+explorer = DRIAMSDatasetExplorer(DRIAMS_ROOT)
 
 driams_dataset = load_driams_dataset(
             explorer.root,
@@ -31,13 +32,15 @@ driams_dataset = load_driams_dataset(
             handle_missing_resistance_measurements='remove_if_all_missing',
 )
 
-
 # bin spectra
 bv = BinningVectorizer(100, min_bin=2000, max_bin=20000)
 X = bv.fit_transform(driams_dataset.X)
 
 # train-test split
-index_train, index_test = stratify_by_species_and_label(driams_dataset.y, antibiotic='Ciprofloxacin')
+index_train, index_test = stratify_by_species_and_label(
+    driams_dataset.y, antibiotic='Ciprofloxacin'
+)
+
 print(index_train)
 print(index_test)
 
@@ -50,5 +53,3 @@ lr.fit(X[index_train], y[index_train])
 y_pred = lr.predict(X[index_test])
 
 print(accuracy_score(y_pred, y[index_test]))
-
-
