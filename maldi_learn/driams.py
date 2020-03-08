@@ -503,6 +503,7 @@ class DRIAMSLabelEncoder(LabelEncoder):
             'I': 1,
             'S': 0,
             'R(1)': np.nan,
+            'R(2)': np.nan,
             'L(1)': np.nan,
             'I(1)': np.nan,
             'I(1), S(1)': np.nan,
