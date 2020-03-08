@@ -14,20 +14,64 @@ DRIAMS_ROOT = os.getenv('DRIAMS_ROOT')
 
 explorer = DRIAMSDatasetExplorer(DRIAMS_ROOT)
 
+antibiotics = [
+    '5-Fluorocytosin',
+    'Amikacin',
+    'Amoxicillin',
+    'Amoxicillin-Clavulanic acid',
+    'Ampicillin-Amoxicillin',
+    'Anidulafungin',
+    'Aztreonam',
+    'Caspofungin',
+    'Cefazolin',
+    'Cefepime',
+    'Cefpodoxime',
+    'Ceftazidim',
+    'Cefuroxime',
+    'Ceftriaxone',
+    'Ciprofloxacin',
+    'Clindamycin',
+    'Colistin',
+    'Daptomycin',
+    'Ertapenem',
+    'Erythromycin',
+    'Fluconazole',
+    'Fosfomycin-Trometamol',
+    'Fusidic acid',
+    'Gentamicin',
+    'Imipenem',
+    'Itraconazole',
+    'Levofloxacin',
+    'Meropenem',
+    'Micafungin',
+    'Nitrofurantoin',
+    'Norfloxacin',
+    'Oxacillin',
+    'Penicillin',
+    'Piperacillin-Tazobactam',
+    'Rifampicin',
+    'Teicoplanin',
+    'Tetracycline',
+    'Tobramycin',
+    'Trimethoprim-Sulfamethoxazole',
+    'Tigecycline',
+    'Vancomycin',
+    'Voriconazole',
+]
+
 driams_dataset = load_driams_dataset(
             explorer.root,
             'DRIAMS-A',
-            ['2015', '2017'],
+            ['2015', '2016', '2017', '2018'],
             '*',
-            ['5-Fluorocytosin', 'Ciprofloxacin'],
+            antibiotics=antibiotics,
             encoder=DRIAMSLabelEncoder(),
             handle_missing_resistance_measurements='remove_if_all_missing',
-            nrows=4000,
 )
 
 # train-test split
 train_index, test_index = stratify_by_species_and_label(
-    driams_dataset.y, antibiotic='5-Fluorocytosin',
+    driams_dataset.y, antibiotic='Ciprofloxacin',
     remove_invalid=True,
 )
 
