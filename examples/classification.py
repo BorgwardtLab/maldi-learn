@@ -4,13 +4,13 @@
 import dotenv
 import os
 
-from driams import DRIAMSDatasetExplorer
-from driams import DRIAMSDataset
-from driams import DRIAMSLabelEncoder
+from maldi_learn.driams import DRIAMSDatasetExplorer
+from maldi_learn.driams import DRIAMSDataset
+from maldi_learn.driams import DRIAMSLabelEncoder
 
-from driams import load_driams_dataset
+from maldi_learn.driams import load_driams_dataset
 from maldi_learn.vectorization import BinningVectorizer
-from utilities import stratify_by_species_and_label
+from maldi_learn.utilities import stratify_by_species_and_label
 
 from sklearn.linear_model import LogisticRegression
 from sklearn.metrics import accuracy_score
