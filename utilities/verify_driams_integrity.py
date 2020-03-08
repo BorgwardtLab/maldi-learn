@@ -10,7 +10,7 @@ import os
 
 import numpy as np
 
-from driams import load_spectrum
+from maldi_learn.driams import load_spectrum
 
 from tqdm import tqdm
 
