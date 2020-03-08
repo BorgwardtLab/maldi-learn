@@ -11,9 +11,9 @@ import os
 
 import pandas as pd
 
-from driams import DRIAMSDatasetExplorer
-from driams import DRIAMSLabelEncoder
-from driams import load_driams_dataset
+from maldi_learn.driams import DRIAMSDatasetExplorer
+from maldi_learn.driams import DRIAMSLabelEncoder
+from maldi_learn.driams import load_driams_dataset
 
 from maldi_learn.vectorization import BinningVectorizer
 
