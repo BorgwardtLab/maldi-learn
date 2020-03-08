@@ -239,11 +239,11 @@ class DRIAMSDataset:
         # return dict with label as key, and class fraction as value
         return fraq_dict
 
-    def to_numpy(self, antibiotic): 
+    def to_numpy(self, antibiotic, dtype=int):
         # return y as numpy array as imput for classification
         y = self.y.loc[:, [c for c in self.y.columns if c not in
             _metadata_columns]]
-        return y[antibiotic].to_numpy().astype(int)
+        return y[antibiotic].to_numpy().astype(dtype)
 
 
 def load_spectrum(filename):
