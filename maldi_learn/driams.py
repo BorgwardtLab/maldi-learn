@@ -279,7 +279,7 @@ def load_driams_dataset(
     antibiotics,
     encoder=None,
     handle_missing_resistance_measurements='remove_if_all_missing',
-    load_raw=False,
+    spectra_type='preprocessed',
     **kwargs,
 ):
     """Load DRIAMS data set for a specific site and specific year.
@@ -334,11 +334,22 @@ def load_driams_dataset(
             'remove_if_any_missing'
             'keep'
 
-    load_raw:
-        If set, loads the *raw* spectra instead of the pre-processed
-        one. This has no bearing whatsoever on the labels and metadata
-        and merely changes the resulting spectra. If not set, loads
-        the pre-processed spectra instead.
+    spectra_type : str
+        Sets the type of data to load. This must refer to a folder
+        within the hierarchy of DRIAMS containing the same spectra
+        that are listed in the corresponding ID files. Setting new
+        types can be useful for loading pre-processed spectra such
+        as spectra that have already been binned.
+
+        Changing this option has no effect on the metadata or the
+        labels. It only affects the spectra. The following values
+        are always valid:
+
+            - `raw`: loads raw spectra (no pre-processing)
+            - `preprocessed`: loads pre-processed spectra, whose peaks
+              have been aligned etc.
+
+        By default, pre-processed spectra are loaded.
 
     kwargs:
         Optional keyword arguments for changing the downstream behaviour
@@ -351,11 +362,6 @@ def load_driams_dataset(
     -------
     Instance of `DRIAMSDataset`, containing all loaded spectra.
     """
-    if load_raw:
-        spectra_type = 'raw'
-    else:
-        spectra_type = 'preprocessed'
-
     if type(years) is not list:
         years = [years]
 
