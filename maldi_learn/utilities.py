@@ -81,6 +81,7 @@ def stratify_by_species_and_label(
     # second dimension is the (binary) label calculated from information
     # about resistance & susceptibility.
     stratify = np.vstack((species_transform, labels)).T
+    stratify = stratify.astype('int')
 
     if remove_invalid:
         _, indices, counts = np.unique(
