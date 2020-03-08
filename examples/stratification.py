@@ -71,7 +71,7 @@ driams_dataset = load_driams_dataset(
 
 # train-test split
 train_index, test_index = stratify_by_species_and_label(
-    driams_dataset.y, antibiotic='Ciprofloxacin',
+    driams_dataset.y, antibiotic='5-Fluorocytosin',
     remove_invalid=True,
 )
 
