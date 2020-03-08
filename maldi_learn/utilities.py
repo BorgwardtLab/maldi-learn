@@ -25,6 +25,7 @@ def stratify_by_species_and_label(
     y,
     antibiotic,
     test_size=0.2,
+    remove_invalid=True,
     random_state=123
 ):
     """Stratification by species and antibiotic label.
@@ -48,12 +49,21 @@ def stratify_by_species_and_label(
         This function cannot guarantee that a specific test size will
         lead to a valid split. In this case, it will fail.
 
+    remove_invalid : bool
+        If set, removes invalid species--antibiotic combinations from
+        the reported indices. A combination is invalid if the number
+        of samples is insufficient. Such combinations cannot be used
+        in stratified train--test split anyway.
+
     random_state:
         Specifies the random state to use for the split.
 
     Returns
     -------
-    Tuple of train and test indices.
+    Tuple of train and test indices, each one of them being an
+    `np.ndarray`. If `remove_invalid` has been set, the totality
+    of all train and test indices does not necessarily add up to
+    the whole data set.
     """
     _check_y(y)
     n_samples = y.shape[0]
@@ -72,24 +82,22 @@ def stratify_by_species_and_label(
     # about resistance & susceptibility.
     stratify = np.vstack((species_transform, labels)).T
 
-    # TODO: make this behaviour configurable; currently, we are always
-    # removing all the indices that do not work.
+    if remove_invalid:
+        _, indices, counts = np.unique(
+            stratify,
+            axis=0,
+            return_index=True,
+            return_counts=True
+        )
 
-    _, indices, counts = np.unique(
-        stratify,
-        axis=0,
-        return_index=True,
-        return_counts=True
-    )
+        # Get indices of all elements that appear an insufficient number of
+        # times to be used in the stratification.
+        invalid_indices = indices[counts < 2]
 
-    # Get indices of all elements that appear an insufficient number of
-    # times to be used in the stratification.
-    invalid_indices = indices[counts < 2]
-
-    # Replace all of them by a 'fake' class whose numbers are guaranteed
-    # *not* to occur in the data set (because labels are encoded from 0,
-    # and the binary label is either 0 or 1).
-    stratify[invalid_indices, :] = [-1, -1]
+        # Replace all of them by a 'fake' class whose numbers are guaranteed
+        # *not* to occur in the data set (because labels are encoded from 0,
+        # and the binary label is either 0 or 1).
+        stratify[invalid_indices, :] = [-1, -1]
 
     train_index, test_index = train_test_split(
         range(n_samples),
@@ -98,20 +106,27 @@ def stratify_by_species_and_label(
         random_state=random_state
     )
 
+    # Ensures that the reported indices can be easily used for subset
+    # creation later on.
     train_index = np.asarray(train_index)
-    train_index = train_index[
-                    np.isin(train_index,
-                            invalid_indices,
-                            assume_unique=True,
-                            invert=True)
-                ]
-
     test_index = np.asarray(test_index)
-    test_index = test_index[
-                    np.isin(test_index,
-                            invalid_indices,
-                            assume_unique=True,
-                            invert=True)
-               ]
+
+    # Remove all indices of the virtual class afterwards. Thus, the
+    # reported train and test indices do not correspond to the whole
+    # data set necessarily.
+    if remove_invalid:
+        train_index = train_index[
+                        np.isin(train_index,
+                                invalid_indices,
+                                assume_unique=True,
+                                invert=True)
+                    ]
+
+        test_index = test_index[
+                        np.isin(test_index,
+                                invalid_indices,
+                                assume_unique=True,
+                                invert=True)
+                   ]
 
     return train_index, test_index
