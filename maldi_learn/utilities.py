@@ -3,6 +3,8 @@
 It contains several functions used the main scripts.
 """
 
+import itertools
+
 import numpy as np
 import pandas as pd
 
@@ -68,40 +70,63 @@ def stratify_by_species_and_label(
     _check_y(y)
     n_samples = y.shape[0]
 
+    # First, get the valid indices: valid indices are indices that
+    # correspond to a finite label in the data. Since infinite, or
+    # NaN values, cannot be handled, we have to remove them.
+    labels = y[antibiotic].values
+    labels = labels.astype('float')
+
+    # These are the valid indices for the subsequent split. Set the
+    # labels vector accordingly.
+    valid_indices = np.nonzero(np.isfinite(labels))[0]
+
+    # Valid labels that we will subsequently use. The additional
+    # underscore is used because we might have to modify this vector
+    # prior to using it for the split.
+    labels_ = labels[valid_indices]
+
     # Encode species information to simplify the stratification. Every
     # combination of antibiotic and species will be encoded as an
     # individual class.
-    le = LabelEncoder()
+    species_encoded = LabelEncoder().fit_transform(y.species)
 
-    species_transform = le.fit_transform(y.species)
-    labels = y[antibiotic].values
+    # Again, only use *valid indices* here and employ an underscore
+    # because the resulting vector might yet have to be modified.
+    species_encoded_ = species_encoded[valid_indices]
 
     # Creates the *combined* label required for the stratification. The
     # first dimension of the vector is the encoded species, while the
     # second dimension is the (binary) label calculated from information
     # about resistance & susceptibility.
-    stratify = np.vstack((species_transform, labels)).T
+    stratify = np.vstack((species_encoded_, labels_)).T
     stratify = stratify.astype('int')
 
     if remove_invalid:
-        _, indices, counts = np.unique(
+        unique, counts = np.unique(
             stratify,
             axis=0,
-            return_index=True,
             return_counts=True
         )
 
-        # Get indices of all elements that appear an insufficient number of
-        # times to be used in the stratification.
-        invalid_indices = indices[counts < 2]
+        # Subset the valid indices by only keeping those elements that
+        # occur at least twice. Repeat the subsetting from above, such
+        # that the subsequent operations only use valid stratification
+        # indices, and build a new stratification vector.
 
-        # Replace all of them by a 'fake' class whose numbers are guaranteed
-        # *not* to occur in the data set (because labels are encoded from 0,
-        # and the binary label is either 0 or 1).
-        stratify[invalid_indices, :] = [-1, -1]
+        unique = unique[counts >= 2]
+
+        valid_indices = [
+            (stratify == u).all(axis=1).nonzero()[0].tolist() for u in unique
+        ]
+
+        valid_indices = sorted(itertools.chain.from_iterable(valid_indices))
+
+        labels_ = labels[valid_indices].astype('int')
+        species_encoded_ = species_encoded[valid_indices].astype('int')
+        stratify = np.vstack((species_encoded_, labels_)).T
 
     train_index, test_index = train_test_split(
-        range(n_samples),
+        valid_indices,
         test_size=test_size,
         stratify=stratify,
         random_state=random_state
@@ -111,23 +136,5 @@ def stratify_by_species_and_label(
     # creation later on.
     train_index = np.asarray(train_index)
     test_index = np.asarray(test_index)
-
-    # Remove all indices of the virtual class afterwards. Thus, the
-    # reported train and test indices do not correspond to the whole
-    # data set necessarily.
-    if remove_invalid:
-        train_index = train_index[
-                        np.isin(train_index,
-                                invalid_indices,
-                                assume_unique=True,
-                                invert=True)
-                    ]
-
-        test_index = test_index[
-                        np.isin(test_index,
-                                invalid_indices,
-                                assume_unique=True,
-                                invert=True)
-                   ]
 
     return train_index, test_index
