@@ -183,11 +183,19 @@ def stratify_by_species_and_label_pd(
     """
     _check_y(y)
 
+    # Ensures that we always get an integer-based index for the data
+    # frame, regardless of the existence of a code-based index.
+    df = y.reset_index()
+
     df = y.groupby([antibiotic, 'species'])
     df = df.size().reset_index().rename(columns={0: 'count'})
 
-    df = df[df['count'] >= 2]
+    df = df[df['count'] == 1]
     df = df[[antibiotic, 'species']]
+
+    invalid_indices = df.index.values
+
+    print(type(invalid_indices))
 
     A, S = df[antibiotic].values, df['species'].values
 
