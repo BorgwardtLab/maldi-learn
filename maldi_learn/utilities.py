@@ -27,6 +27,7 @@ def stratify_by_species_and_label(
     y,
     antibiotic,
     test_size=0.2,
+    implementation='pandas',
     remove_invalid=True,
     random_state=123
 ):
@@ -51,6 +52,13 @@ def stratify_by_species_and_label(
         This function cannot guarantee that a specific test size will
         lead to a valid split. In this case, it will fail.
 
+    implementation : str
+        Can be either `numpy` or `pandas` to indicate which implementation
+        shall be used. Functionally, both of are equivalent. The `numpy`
+        one is faster in case a lot of samples have to be thrown *away*,
+        while the `pandas` one is faster in case of lot of samples have
+        to be *kept*.
+
     remove_invalid : bool
         If set, removes invalid species--antibiotic combinations from
         the reported indices. A combination is invalid if the number
@@ -69,6 +77,30 @@ def stratify_by_species_and_label(
     """
     _check_y(y)
 
+    if implementation == 'numpy':
+        return _stratify_by_species_and_label_numpy(
+                    y,
+                    antibiotic,
+                    test_size,
+                    remove_invalid,
+                    random_state
+                )
+    elif implementation == 'pandas':
+        return _stratify_by_species_and_label_pandas(
+                    y,
+                    antibiotic,
+                    test_size,
+                    random_state
+                )
+
+
+def _stratify_by_species_and_label_numpy(
+    y,
+    antibiotic,
+    test_size=0.2,
+    remove_invalid=True,
+    random_state=123
+):
     # First, get the valid indices: valid indices are indices that
     # correspond to a finite label in the data. Since infinite, or
     # NaN values, cannot be handled, we have to remove them.
@@ -143,46 +175,12 @@ def stratify_by_species_and_label(
     return train_index, test_index
 
 
-def stratify_by_species_and_label_pd(
+def _stratify_by_species_and_label_pandas(
     y,
     antibiotic,
-    test_size=0.2,
-    remove_invalid=True,
-    random_state=123
+    test_size,
+    random_state,
 ):
-    """Stratification by species and antibiotic label.
-
-    This function performs a stratified train--test split, taking into
-    account species *and* label information.
-
-    Parameters
-    ----------
-    y : pandas.DataFrame
-        Label data frame containing information about the species, the
-        antibiotics, and other (optional) information, which is ignored
-        by this function.
-
-    antibiotic : str
-        Specifies the antibiotic for the stratification. This must be
-        a valid column in `y`.
-
-    test_size: float
-        Specifies the size of the test data set returned by the split.
-        This function cannot guarantee that a specific test size will
-        lead to a valid split. In this case, it will fail.
-
-    random_state:
-        Specifies the random state to use for the split.
-
-    Returns
-    -------
-    Tuple of train and test indices, each one of them being an
-    `np.ndarray`. If `remove_invalid` has been set, the totality
-    of all train and test indices does not necessarily add up to
-    the whole data set.
-    """
-    _check_y(y)
-
     # Ensures that we always get an integer-based index for the data
     # frame, regardless of the existence of a code-based index. Also
     # create a simplified copy of the data frame to speed things up.
