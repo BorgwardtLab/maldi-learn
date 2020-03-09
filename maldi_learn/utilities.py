@@ -187,24 +187,11 @@ def stratify_by_species_and_label_pd(
     # frame, regardless of the existence of a code-based index.
     df = y.reset_index()
 
-    df = y.groupby([antibiotic, 'species'])
-    df = df.size().reset_index().rename(columns={0: 'count'})
+    df = df[[antibiotic, 'species']].dropna()
+    df = df[df.duplicated(keep=False)]
+    valid_indices = df.index
 
-    df = df[df['count'] == 1]
-    df = df[[antibiotic, 'species']]
-
-    invalid_indices = df.index.values
-
-    print(type(invalid_indices))
-
-    A, S = df[antibiotic].values, df['species'].values
-
-    y['antibiotic'] = y[antibiotic]
-
-    for a, s in zip(A, S):
-        print(y.query('species == @s and `antibiotic` == @a').index.values)
-
-    # TODO: flesh this out further
+    stratify = df[[antibiotic, 'species']].values
 
     train_index, test_index = train_test_split(
         valid_indices,
