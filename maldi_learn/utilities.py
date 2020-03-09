@@ -184,18 +184,29 @@ def stratify_by_species_and_label_pd(
     _check_y(y)
 
     # Ensures that we always get an integer-based index for the data
-    # frame, regardless of the existence of a code-based index.
-    df = y.reset_index()
+    # frame, regardless of the existence of a code-based index. Also
+    # create a simplified copy of the data frame to speed things up.
+    df = y.reset_index()[['species', antibiotic]]
 
+    # Slightly speeds up searching for duplicates when modifying the
+    # data frame later on.
     df['species'] = LabelEncoder().fit_transform(df['species'])
 
-    df = df[['species', antibiotic]].dropna()
-    df = df.astype({antibiotic: 'int'})
+    # Drop all NaN values in the current antibiotic column and change
+    # the `dtype` to prepare for the subsequent stratification.
+    df = df[df[antibiotic].notna()].astype(
+        {
+            'species': 'int',
+            antibiotic: 'int',
+        }
+    )
 
+    # Only keep duplicate rows, i.e. rows that occur multiple times.
+    # These are the rows we can use for stratification below.
     df = df[df.duplicated(keep=False)]
-    valid_indices = df.index
 
-    stratify = df[['species', antibiotic]].values
+    valid_indices = df.index  # Remaining indices that are valid for split
+    stratify = df.values      # Joint class labels
 
     train_index, test_index = train_test_split(
         valid_indices,
@@ -204,9 +215,4 @@ def stratify_by_species_and_label_pd(
         random_state=random_state
     )
 
-    # Ensures that the reported indices can be easily used for subset
-    # creation later on.
-    train_index = np.asarray(train_index)
-    test_index = np.asarray(test_index)
-
-    return train_index, test_index
+    return np.asarray(train_index), np.asarray(test_index)
