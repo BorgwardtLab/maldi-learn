@@ -187,11 +187,15 @@ def stratify_by_species_and_label_pd(
     # frame, regardless of the existence of a code-based index.
     df = y.reset_index()
 
-    df = df[[antibiotic, 'species']].dropna()
+    df['species'] = LabelEncoder().fit_transform(df['species'])
+
+    df = df[['species', antibiotic]].dropna()
+    df = df.astype({antibiotic: 'int'})
+
     df = df[df.duplicated(keep=False)]
     valid_indices = df.index
 
-    stratify = df[[antibiotic, 'species']].values
+    stratify = df[['species', antibiotic]].values
 
     train_index, test_index = train_test_split(
         valid_indices,
