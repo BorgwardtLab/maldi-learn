@@ -36,6 +36,11 @@ def stratify_by_species_and_label(
     This function performs a stratified train--test split, taking into
     account species *and* label information.
 
+    If set, removes invalid species--antibiotic combinations from
+    the reported indices. A combination is invalid if the number
+    of samples is insufficient. Such combinations cannot be used
+    in stratified train--test split anyway.
+
     Parameters
     ----------
     y : pandas.DataFrame
@@ -59,19 +64,13 @@ def stratify_by_species_and_label(
         while the `pandas` one is faster in case of lot of samples have
         to be *kept*.
 
-    remove_invalid : bool
-        If set, removes invalid species--antibiotic combinations from
-        the reported indices. A combination is invalid if the number
-        of samples is insufficient. Such combinations cannot be used
-        in stratified train--test split anyway.
-
-    random_state:
+     random_state : int, `None`, or `RandomState` instance
         Specifies the random state to use for the split.
 
     Returns
     -------
     Tuple of train and test indices, each one of them being an
-    `np.ndarray`. If `remove_invalid` has been set, the totality
+    `np.ndarray`. As invalid samples will be removed, the totality
     of all train and test indices does not necessarily add up to
     the whole data set.
     """
@@ -82,7 +81,6 @@ def stratify_by_species_and_label(
                     y,
                     antibiotic,
                     test_size,
-                    remove_invalid,
                     random_state
                 )
     elif implementation == 'pandas':
@@ -98,7 +96,6 @@ def _stratify_by_species_and_label_numpy(
     y,
     antibiotic,
     test_size=0.2,
-    remove_invalid=True,
     random_state=123
 ):
     # First, get the valid indices: valid indices are indices that
@@ -132,33 +129,32 @@ def _stratify_by_species_and_label_numpy(
     stratify = np.vstack((species_encoded_, labels_)).T
     stratify = stratify.astype('int')
 
-    if remove_invalid:
-        unique, counts = np.unique(
-            stratify,
-            axis=0,
-            return_counts=True
-        )
+    unique, counts = np.unique(
+        stratify,
+        axis=0,
+        return_counts=True
+    )
 
-        # Subset the valid indices by only keeping those elements that
-        # occur at least twice. Repeat the subsetting from above, such
-        # that the subsequent operations only use valid stratification
-        # indices, and build a new stratification vector.
+    # Subset the valid indices by only keeping those elements that
+    # occur at least twice. Repeat the subsetting from above, such
+    # that the subsequent operations only use valid stratification
+    # indices, and build a new stratification vector.
 
-        unique = unique[counts >= 2]
+    unique = unique[counts >= 2]
 
-        # Collect indices corresponding to all valid combinations. This
-        # is relative to the stratification vector, though, so to get a
-        # global lookup, we have to subset `valid_indices`.
-        idx_ = [
-            (stratify == u).all(axis=1).nonzero()[0].tolist() for u in unique
-        ]
+    # Collect indices corresponding to all valid combinations. This
+    # is relative to the stratification vector, though, so to get a
+    # global lookup, we have to subset `valid_indices`.
+    idx_ = [
+        (stratify == u).all(axis=1).nonzero()[0].tolist() for u in unique
+    ]
 
-        idx_ = sorted(itertools.chain.from_iterable(idx_))
-        valid_indices = valid_indices[idx_]
+    idx_ = sorted(itertools.chain.from_iterable(idx_))
+    valid_indices = valid_indices[idx_]
 
-        labels_ = labels[valid_indices].astype('int')
-        species_encoded_ = species_encoded[valid_indices].astype('int')
-        stratify = np.vstack((species_encoded_, labels_)).T
+    labels_ = labels[valid_indices].astype('int')
+    species_encoded_ = species_encoded[valid_indices].astype('int')
+    stratify = np.vstack((species_encoded_, labels_)).T
 
     train_index, test_index = train_test_split(
         valid_indices,
