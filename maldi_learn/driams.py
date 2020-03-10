@@ -5,6 +5,7 @@ exploration classes and loaders.
 """
 
 import dotenv
+import hashlib
 import os
 import itertools
 import warnings
@@ -209,6 +210,7 @@ class DRIAMSDatasetExplorer:
             Specifies which site should be used for the fingerprint
             information.
         """
+        hashes = {}
         for year in self.available_years(site):
             path = os.path.join(
                         self.root,
@@ -220,9 +222,13 @@ class DRIAMSDatasetExplorer:
 
             df = pd.read_csv(path, low_memory=False)
 
-            # TODO: perform hashing and return it
+            hash_ = hashlib.sha1(
+                    pd.util.hash_pandas_object(df, index=True).values
+                ).hexdigest()
 
-        return {}
+            hashes[os.path.basename(path)] = hash_
+
+        return hashes
 
 
 class DRIAMSDataset:
