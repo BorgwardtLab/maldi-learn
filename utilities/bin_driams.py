@@ -68,15 +68,6 @@ if __name__ == '__main__':
                 handle_missing_resistance_measurements='remove_if_all_missing'
         )
 
-        bv = BinningVectorizer(
-                args.bins,
-                min_bin=2000,
-                max_bin=20000,
-                n_jobs=-1  # Use all available cores to perform the processing
-        )
-
-        X = bv.fit_transform(driams_dataset.X)
-
         # Follows the same hierarchy as the other data sets. For
         # example, if site DRIAMS-A is being pre-processed, each
         # file will be stored in
@@ -94,9 +85,16 @@ if __name__ == '__main__':
 
         os.makedirs(output_directory, exist_ok=True)
 
+        bv = BinningVectorizer(
+                args.bins,
+                min_bin=2000,
+                max_bin=20000,
+                n_jobs=-1  # Use all available cores to perform the processing
+        )
+
         codes = driams_dataset.y['code'].values
 
-        for spectrum, code in zip(X, codes):
+        for spectrum, code in zip(driams_dataset.X, codes):
             output_file = os.path.join(
                 output_directory,
                 f'{code}.txt'
@@ -107,10 +105,12 @@ if __name__ == '__main__':
             if os.path.exists(output_file):
                 continue
 
+            X = bv.fit_transform([spectrum])[0]
+
             # Turn the spectrum vector into a data frame that tries to
             # at least partially maintain a description. This also has
             # the advantage of automatically generating an index.
-            df = pd.DataFrame({'binned_intensity': spectrum})
+            df = pd.DataFrame({'binned_intensity': X})
             df.index.name = 'bin_index'
 
             # Use a proper separator to be compatible with our reader.
