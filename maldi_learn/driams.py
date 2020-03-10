@@ -196,6 +196,34 @@ class DRIAMSDatasetExplorer:
         """Return available sites in the data set."""
         return self._get_available_sites()
 
+    def metadata_fingerprints(self, site):
+        """Return available metadata filenames and their fingerprints.
+
+        This function is a purely descriptive function whose goal is to
+        provide more information about the metadata files. For each one
+        of these files, it will calculate the SHA-1 hash and return it.
+
+        Parameters
+        ----------
+        site : str
+            Specifies which site should be used for the fingerprint
+            information.
+        """
+        for year in self.available_years(site):
+            path = os.path.join(
+                        self.root,
+                        site,
+                        'id',
+                        year,
+                        f'{year}_clean.csv'
+                )
+
+            df = pd.read_csv(path, low_memory=False)
+
+            # TODO: perform hashing and return it
+
+        return {}
+
 
 class DRIAMSDataset:
     """DRIAMS data set."""
