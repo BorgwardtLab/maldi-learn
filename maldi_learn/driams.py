@@ -511,8 +511,6 @@ def _load_metadata(
     # frame. We do not want to return invalid data frames, even though
     # it is possible that a data frame is empty, depending on how this
     # function handles missing values.
-    #
-    
     for antibiotic in antibiotics:
 
         if antibiotic not in metadata.columns:
@@ -523,10 +521,10 @@ def _load_metadata(
                 on_error
             )
 
-        # Type-cast all columns into `object`. This ensures that the label
-        # encoding works correctly in all cases because `object` makes it
-        # possible to handle `nan` and arbitrary strings.
-        metadata[antibiotic] = metadata[antibiotic].astype('object')
+    # Type-cast all columns into `object`. This ensures that the label
+    # encoding works correctly in all cases because `object` makes it
+    # possible to handle `nan` and arbitrary strings.
+    metadata = metadata.astype({a: 'object' for a in antibiotics}, copy=False)
 
     # Ensures that all requested antibiotics are present in the
     # data frame. Afterwards, we restrict the data frame to the
