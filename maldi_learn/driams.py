@@ -16,6 +16,11 @@ import pandas as pd
 from maldi_learn.data import MaldiTofSpectrum
 from maldi_learn.preprocessing.generic import LabelEncoder
 
+from maldi_learn.exceptions import SpeciesNotFoundException
+from maldi_learn.exceptions import SpeciesNotFoundWarning
+from maldi_learn.exceptions import _raise_or_warn
+
+
 # Pulls in the environment variables in order to simplify the access to
 # the root directory.
 dotenv.load_dotenv()
@@ -314,6 +319,7 @@ def load_driams_dataset(
     encoder=None,
     handle_missing_resistance_measurements='remove_if_all_missing',
     spectra_type='preprocessed',
+    on_error='raise',
     **kwargs,
 ):
     """Load DRIAMS data set for a specific site and specific year.
@@ -385,6 +391,11 @@ def load_driams_dataset(
 
         By default, pre-processed spectra are loaded.
 
+    on_error : str
+        Sets the behaviour in case of an error. If set to 'raise', the
+        code will raise an exception for every error it encounters. If
+        set to 'warn' or 'warning', only a warning will be shown.
+
     kwargs:
         Optional keyword arguments for changing the downstream behaviour
         of some functions. At present, the following keys are supported:
@@ -414,6 +425,7 @@ def load_driams_dataset(
             antibiotics,
             encoder,
             handle_missing_resistance_measurements,
+            on_error,
             **kwargs,
         )
 
@@ -449,9 +461,18 @@ def _load_metadata(
     antibiotics,
     encoder,
     handle_missing_resistance_measurements,
+    on_error,
     **kwargs,
 ):
+    """Internal function for loading metadata file.
 
+    This function does the 'heavy lifting' for loading the metadata
+    files. It ensures that all desired species and antibiotics are
+    loaded correctly and encoded for subsequent processing.
+
+    Please refer to `load_driams_dataset()` for a description of all
+    parameters.
+    """
     # Ensures that we always get a list of antibiotics for subsequent
     # processing.
     if type(antibiotics) is not list:
@@ -466,13 +487,22 @@ def _load_metadata(
     metadata = pd.read_csv(
                     filename,
                     low_memory=False,
-                    na_values=['-'],
-                    keep_default_na=True,
+                    na_values=['-'],        # additional way to encode `Nan`
+                    keep_default_na=True,   # keep default `NaN` encodings
                     nrows=kwargs.get('nrows', None),
                 )
 
     # Perform no species filtering if *all* species are requested.
     if species != '*':
+
+        if species not in metadata['species']:
+            _raise_or_warn(
+                    SpeciesNotFoundException,
+                    SpeciesNotFoundWarning,
+                    f'Species {species} was not found',
+                    on_error
+            )
+
         metadata = metadata.query('species == @species')
 
     # ensures that all requested antibiotics are present in the
