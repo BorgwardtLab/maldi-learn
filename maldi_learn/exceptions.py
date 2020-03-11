@@ -3,6 +3,17 @@
 import warnings
 
 
+class AntibioticNotFoundException(ValueError):
+    """Exception to raise if an antibiotic was not found."""
+
+    def __init__(self, message):
+        super().__init__(message)
+
+
+class AntibioticNotFoundWarning(UserWarning):
+    """Warning to show if an antibiotic was not found."""
+
+
 class SpeciesNotFoundException(ValueError):
     """Exception to raise if a species was not found."""
 
