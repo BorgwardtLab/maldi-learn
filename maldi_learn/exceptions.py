@@ -6,6 +6,9 @@ import warnings
 class SpeciesNotFoundException(ValueError):
     """Exception to raise if a species was not found."""
 
+    def __init__(self, message):
+        super().__init__(message)
+
 
 class SpeciesNotFoundWarning(UserWarning):
     """Warning to show if a species was not found."""
