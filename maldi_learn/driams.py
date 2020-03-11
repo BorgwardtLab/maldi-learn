@@ -16,6 +16,8 @@ import pandas as pd
 from maldi_learn.data import MaldiTofSpectrum
 from maldi_learn.preprocessing.generic import LabelEncoder
 
+from maldi_learn.exceptions import AntibioticNotFoundException
+from maldi_learn.exceptions import AntibioticNotFoundWarning
 from maldi_learn.exceptions import SpeciesNotFoundException
 from maldi_learn.exceptions import SpeciesNotFoundWarning
 from maldi_learn.exceptions import _raise_or_warn
@@ -495,7 +497,7 @@ def _load_metadata(
     # Perform no species filtering if *all* species are requested.
     if species != '*':
 
-        if species not in metadata['species']:
+        if species not in metadata['species'].values:
             _raise_or_warn(
                     SpeciesNotFoundException,
                     SpeciesNotFoundWarning,
@@ -505,20 +507,33 @@ def _load_metadata(
 
         metadata = metadata.query('species == @species')
 
-    # ensures that all requested antibiotics are present in the
-    # dataframe. might be filled with nans if not present
-    metadata = metadata.reindex(columns=_metadata_columns + antibiotics)
-
-    # TODO raise warning if absent antibiotics are requested
-    # TODO make cleaner
-
-    # Type-cast all columns into `object`. This ensures that the label
-    # encoding works correctly in all cases because `object` makes it
-    # possible to handle `nan` and arbitray strings.
+    # Check existence of each antibiotic prior to re-indexing the data
+    # frame. We do not want to return invalid data frames, even though
+    # it is possible that a data frame is empty, depending on how this
+    # function handles missing values.
+    #
+    
     for antibiotic in antibiotics:
+
+        if antibiotic not in metadata.columns:
+            _raise_or_warn(
+                AntibioticNotFoundException,
+                AntibioticNotFoundWarning,
+                f'Antibiotic {antibiotic} was not found',
+                on_error
+            )
+
+        # Type-cast all columns into `object`. This ensures that the label
+        # encoding works correctly in all cases because `object` makes it
+        # possible to handle `nan` and arbitrary strings.
         metadata[antibiotic] = metadata[antibiotic].astype('object')
 
+    # Ensures that all requested antibiotics are present in the
+    # data frame. Afterwards, we restrict the data frame to the
+    # relevant columns.
+    metadata = metadata.reindex(columns=_metadata_columns + antibiotics)
     metadata = metadata[_metadata_columns + antibiotics]
+
     n_antibiotics = len(antibiotics)
 
     if encoder is not None:
