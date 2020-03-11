@@ -25,6 +25,8 @@ if __name__ == '__main__':
         years = sorted(antibiotics.keys())
 
         for year in years:
+            print(year)
+
             driams_dataset = load_driams_dataset(
                     explorer.root,
                     site,
@@ -32,14 +34,13 @@ if __name__ == '__main__':
                     species='*',
                     antibiotics=antibiotics[year],
                     encoder=DRIAMSLabelEncoder(),
-                    handle_missing_resistance_measurements='remove_if_all_missing',
             )
 
             y = driams_dataset.y
 
             for antibiotic in sorted(antibiotics[year]):
                 counts = y[antibiotic].value_counts().to_dict()
-                print(counts)
+                print(antibiotic, counts)
 
         # FIXME: show all sites, eventually...
         break

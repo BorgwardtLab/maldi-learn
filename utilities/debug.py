@@ -15,7 +15,9 @@ driams_dataset = load_driams_dataset(
             'DRIAMS-A',
             ['2015', '2016', '2017', '2018'],
             '*',
-            ['Trimetohprim-Sulfamethoxazole'],
+            ['Trimethprim-Sulfamethoxazole'],
             encoder=DRIAMSLabelEncoder(),
             handle_missing_resistance_measurements='remove_if_all_missing',
 )
+
+print(driams_dataset.y)
