@@ -482,6 +482,12 @@ def _load_metadata(
     # TODO raise warning if absent antibiotics are requested
     # TODO make cleaner
 
+    # Type-cast all columns into `object`. This ensures that the label
+    # encoding works correctly in all cases because `object` makes it
+    # possible to handle `nan` and arbitray strings.
+    for antibiotic in antibiotics:
+        metadata[antibiotic] = metadata[antibiotic].astype('object')
+
     metadata = metadata[_metadata_columns + antibiotics]
     n_antibiotics = len(antibiotics)
 
