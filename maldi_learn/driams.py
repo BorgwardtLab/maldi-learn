@@ -280,10 +280,39 @@ class DRIAMSDataset:
         # return dict with label as key, and class fraction as value
         return fraq_dict
 
-    def to_numpy(self, antibiotic, dtype=int):
-        # return y as numpy array as imput for classification
-        y = self.y.loc[:, [c for c in self.y.columns if c not in
-            _metadata_columns]]
+    def to_numpy(self, antibiotic, dtype=int, y=None):
+        """Convert label feature vector to `numpy` array.
+
+        Given a data set and an antibiotic, this function creates
+        `numpy` array for use in downstream analysis tasks.
+
+        Parameters
+        ----------
+        antibiotic : str
+            Name of the antibiotic for which labels are supposed to be
+            returned.
+
+        dtype : type
+            Sets type of the created array. Normally, this should not
+            have to be changed.
+
+        y : `pandas.DataFrame`
+            Optional data frame whose labels should be converted to an
+            array. If set, applies all information to a copy of `y`
+            instead of applying it to the current data set.
+
+        Returns
+        -------
+        `numpy.ndarray` of shape (n, 1), where n is the number of
+        samples in the data set.
+        """
+        if y is None:
+            y = self.y
+
+        # return y as numpy array as input for classification
+        # TODO: do we need this additional conversion?
+        y = y.loc[:, [c for c in self.y.columns if c not in _metadata_columns]]
+
         return y[antibiotic].to_numpy().astype(dtype)
 
 
