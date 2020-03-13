@@ -17,7 +17,6 @@ DRIAMS_ROOT = os.getenv('DRIAMS_ROOT')
 explorer = DRIAMSDatasetExplorer(DRIAMS_ROOT)
 
 antibiotics = [
-    '5-Fluorocytosin',
     'Amikacin',
     'Amoxicillin',
     'Amoxicillin-Clavulanic acid',
@@ -28,7 +27,6 @@ antibiotics = [
     'Cefazolin',
     'Cefepime',
     'Cefpodoxime',
-    'Ceftazidim',
     'Cefuroxime',
     'Ceftriaxone',
     'Ciprofloxacin',
@@ -55,7 +53,6 @@ antibiotics = [
     'Teicoplanin',
     'Tetracycline',
     'Tobramycin',
-    'Trimethoprim-Sulfamethoxazole',
     'Tigecycline',
     'Vancomycin',
     'Voriconazole',
@@ -87,23 +84,28 @@ for antibiotic in antibiotics:
     logging.info(f'Splitting for {antibiotic}...')
 
     try:
-        train_index_1, test_index_1 = stratify_by_species_and_label(
-            driams_dataset.y, antibiotic=antibiotic,
-            implementation='numpy',
-            remove_invalid=True,
-        )
+        train_index_1, test_index_1, train_labels_1, test_labels_1 = \
+            stratify_by_species_and_label(
+                driams_dataset.y, antibiotic=antibiotic,
+                implementation='numpy',
+                return_stratification=True,
+            )
 
     except ValueError:
         continue
 
     logging.info('Finished first stratification')
 
-    train_index_2, test_index_2 = stratify_by_species_and_label(
-        driams_dataset.y, antibiotic=antibiotic,
-        implementation='pandas'
-    )
+    train_index_2, test_index_2, train_labels_2, test_labels_2 = \
+        stratify_by_species_and_label(
+            driams_dataset.y, antibiotic=antibiotic,
+            implementation='pandas',
+            return_stratification=True,
+        )
 
     assert (train_index_1 == train_index_2).all()
     assert (test_index_1 == test_index_2).all()
+    assert (train_labels_1 == train_labels_2).all()
+    assert (test_labels_1 == test_labels_2).all()
 
     logging.info('Finished second stratification')

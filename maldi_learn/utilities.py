@@ -58,9 +58,10 @@ def stratify_by_species_and_label(
         lead to a valid split. In this case, it will fail.
 
     return_stratification : bool
-        If set, returns the vector used to perform the stratification.
+        If set, returns the labels used to perform the stratification.
         This can be helpful when the *same* stratification needs to be
-        used in an additional sampling task.
+        used in an additional sampling task. This will add 2 additional
+        vectors to the return value.
 
     implementation : str
         Can be either `numpy` or `pandas` to indicate which implementation
@@ -78,6 +79,10 @@ def stratify_by_species_and_label(
     `np.ndarray`. As invalid samples will be removed, the totality
     of all train and test indices does not necessarily add up to
     the whole data set.
+
+    If `return_stratification` was set, two label vectors will be
+    returned in addition to the indices. Both of these vectors will
+    contain the *virtual labels* used for the stratification.
     """
     _check_y(y)
 
@@ -164,17 +169,13 @@ def _stratify_by_species_and_label_numpy(
     species_encoded_ = species_encoded[valid_indices].astype('int')
     stratify = np.vstack((species_encoded_, labels_)).T
 
-    train_index, test_index = train_test_split(
-        valid_indices,
-        test_size=test_size,
-        stratify=stratify,
-        random_state=random_state
+    return _train_test_split(
+            array=valid_indices,
+            test_size=test_size,
+            stratify=stratify,
+            random_state=random_state,
+            return_stratification=return_stratification
     )
-
-    if return_stratification:
-        return np.asarray(train_index), np.asarray(test_index), stratify
-    else:
-        return np.asarray(train_index), np.asarray(test_index)
 
 
 def _stratify_by_species_and_label_pandas(
@@ -209,14 +210,45 @@ def _stratify_by_species_and_label_pandas(
     valid_indices = df.index  # Remaining indices that are valid for split
     stratify = df.values      # Joint class labels
 
+    return _train_test_split(
+            array=valid_indices,
+            test_size=test_size,
+            stratify=stratify,
+            random_state=random_state,
+            return_stratification=return_stratification
+    )
+
+
+def _train_test_split(
+    array,
+    test_size,
+    stratify,
+    random_state,
+    return_stratification
+):
+
     train_index, test_index = train_test_split(
-        valid_indices,
+        array,
         test_size=test_size,
         stratify=stratify,
         random_state=random_state
     )
 
+    # Create a virtual split of the labels, making it possible to obtain
+    # a *new* virtual stratification based on the internal labels that
+    # were created.
     if return_stratification:
-        return np.asarray(train_index), np.asarray(test_index), stratify
+
+        train_labels, test_labels = train_test_split(
+            stratify,
+            test_size=test_size,
+            stratify=stratify,
+            random_state=random_state
+        )
+
+        return np.asarray(train_index),  \
+            np.asarray(test_index),   \
+            np.asarray(train_labels), \
+            np.asarray(test_labels)
     else:
         return np.asarray(train_index), np.asarray(test_index)
