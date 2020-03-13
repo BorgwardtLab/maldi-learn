@@ -28,7 +28,7 @@ def stratify_by_species_and_label(
     antibiotic,
     test_size=0.2,
     implementation='pandas',
-    remove_invalid=True,
+    return_stratification=False,
     random_state=123
 ):
     """Stratification by species and antibiotic label.
@@ -57,6 +57,11 @@ def stratify_by_species_and_label(
         This function cannot guarantee that a specific test size will
         lead to a valid split. In this case, it will fail.
 
+    return_stratification : bool
+        If set, returns the vector used to perform the stratification.
+        This can be helpful when the *same* stratification needs to be
+        used in an additional sampling task.
+
     implementation : str
         Can be either `numpy` or `pandas` to indicate which implementation
         shall be used. Functionally, both of are equivalent. The `numpy`
@@ -81,6 +86,7 @@ def stratify_by_species_and_label(
                     y,
                     antibiotic,
                     test_size,
+                    return_stratification,
                     random_state
                 )
     elif implementation == 'pandas':
@@ -88,6 +94,7 @@ def stratify_by_species_and_label(
                     y,
                     antibiotic,
                     test_size,
+                    return_stratification,
                     random_state
                 )
 
@@ -95,8 +102,9 @@ def stratify_by_species_and_label(
 def _stratify_by_species_and_label_numpy(
     y,
     antibiotic,
-    test_size=0.2,
-    random_state=123
+    test_size,
+    return_stratification,
+    random_state
 ):
     # First, get the valid indices: valid indices are indices that
     # correspond to a finite label in the data. Since infinite, or
@@ -163,18 +171,17 @@ def _stratify_by_species_and_label_numpy(
         random_state=random_state
     )
 
-    # Ensures that the reported indices can be easily used for subset
-    # creation later on.
-    train_index = np.asarray(train_index)
-    test_index = np.asarray(test_index)
-
-    return train_index, test_index
+    if return_stratification:
+        return np.asarray(train_index), np.asarray(test_index), stratify
+    else:
+        return np.asarray(train_index), np.asarray(test_index)
 
 
 def _stratify_by_species_and_label_pandas(
     y,
     antibiotic,
     test_size,
+    return_stratification,
     random_state,
 ):
     # Ensures that we always get an integer-based index for the data
@@ -209,4 +216,7 @@ def _stratify_by_species_and_label_pandas(
         random_state=random_state
     )
 
-    return np.asarray(train_index), np.asarray(test_index)
+    if return_stratification:
+        return np.asarray(train_index), np.asarray(test_index), stratify
+    else:
+        return np.asarray(train_index), np.asarray(test_index)
