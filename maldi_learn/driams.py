@@ -160,26 +160,8 @@ class DRIAMSDatasetExplorer:
 
         # If we only get valid ID files, there must not be a `False`
         # entry in the list.
-        valid = [self._is_id_valid(f) for f in filenames]
+        valid = [_check_id_file(f) for f in filenames]
         return False not in valid
-
-    def _is_id_valid(self, id_file):
-        if not os.path.exists(id_file):
-            return False
-
-        try:
-            df = pd.read_csv(id_file, low_memory=False)
-
-            if 'code' not in df.columns:
-                return False
-
-        # Any error will make sure that this ID file is *not* valid
-        except:
-            return False
-
-        # If we made it this far, the file is sufficiently well-formed
-        # to not destroy everything.
-        return True
 
     def _get_available_years(self, site):
 
