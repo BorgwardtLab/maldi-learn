@@ -37,6 +37,52 @@ DRIAMS_ROOT = os.getenv('DRIAMS_ROOT')
 _metadata_columns = ['code', 'species', 'laboratory_species']
 
 
+def _check_id_file(id_file):
+    """Check whether an ID file is valid.
+
+    This is an internal function for checking the consistency of
+    a DRIAMS id file. The file is consistent if it the following
+    conditions are met:
+
+        - the file must contain a 'species' column
+        - the file must contain a 'code' column
+        - neither one of these columns must contain NaN values
+        - neither one of these columns must be empty
+
+    Parameters
+    ----------
+    id_file : str
+        Full path to the ID file that should be checked.
+
+    Returns
+    -------
+    `True` if the ID file is valid, else `False`.
+    """
+    if not os.path.exists(id_file):
+        return False
+
+    try:
+        df = pd.read_csv(id_file, low_memory=False)
+
+        if 'code' not in df.columns or 'species' not in df.columns:
+            return False
+
+        if df['code'].empty or df['code'].isna().sum() != 0:
+            return False
+
+        if df['species'].empty or df['species'].isna().sum() != 0:
+            return False
+
+    # Any exception will make sure that this ID file is *not* valid; we
+    # are not sure which exception to expect here.
+    except Exception:
+        return False
+
+    # If we made it this far, the file is sufficiently well-formed
+    # to not destroy everything.
+    return True
+
+
 class DRIAMSDatasetExplorer:
     """Explorer class for the DRIAMS data set."""
 
