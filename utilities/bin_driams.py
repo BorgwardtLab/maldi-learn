@@ -65,7 +65,7 @@ if __name__ == '__main__':
                 '*',  # Load all species; we do *not* want to filter anything
                 antibiotics[year],
                 encoder=DRIAMSLabelEncoder(),
-                handle_missing_resistance_measurements='remove_if_all_missing'
+                handle_missing_resistance_measurements='remove_if_all_missing',
         )
 
         # Follows the same hierarchy as the other data sets. For
@@ -94,7 +94,9 @@ if __name__ == '__main__':
 
         codes = driams_dataset.y['code'].values
 
-        for spectrum, code in zip(driams_dataset.X, codes):
+        for spectrum, code in tqdm(zip(driams_dataset.X, codes),
+                                   total=len(codes),
+                                   desc='Spectrum'):
             output_file = os.path.join(
                 output_directory,
                 f'{code}.txt'
