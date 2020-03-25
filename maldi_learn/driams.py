@@ -543,6 +543,10 @@ def _load_metadata(
             'keep'
     ]
 
+    if not _check_id_file(filename):
+        raise RuntimeError(f'ID file {filename} is invalid. Please check '
+                           f'whether it contains all required columns.')
+
     metadata = pd.read_csv(
                     filename,
                     low_memory=False,
