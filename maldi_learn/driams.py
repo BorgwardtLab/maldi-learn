@@ -169,6 +169,8 @@ class DRIAMSDatasetExplorer:
     def _get_available_years(self, site):
 
         path = os.path.join(self.root, site, 'id')
+        years = []
+
         for _, dirs, files in os.walk(path):
             years = sorted(dirs)
             break
