@@ -46,7 +46,7 @@ def _check_id_file(id_file):
 
         - the file must contain a 'species' column
         - the file must contain a 'code' column
-        - neither one of these columns must contain NaN values
+        - the 'code' column must not contain `NaN` values
         - neither one of these columns must be empty
 
     Parameters
@@ -70,7 +70,10 @@ def _check_id_file(id_file):
         if df['code'].empty or df['code'].isna().sum() != 0:
             return False
 
-        if df['species'].empty or df['species'].isna().sum() != 0:
+        # Species information is allowed to be missing; while some of
+        # these samples cannot be readily used for classification, it
+        # it possible that another type of analysis might use them.
+        if df['species'].empty:
             return False
 
     # Any exception will make sure that this ID file is *not* valid; we
