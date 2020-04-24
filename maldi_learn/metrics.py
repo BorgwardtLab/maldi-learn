@@ -2,15 +2,31 @@
 Implement own metric functions.
 
 very_major_error_score:
-    Calculates very major error, also called false positive rate.
+    Calculates very major error.
 
 major_error_score:
-    Calculates major error, also called false negative rate.
+    Calculates major error.
 """
 
 from sklearn.metrics import confusion_matrix
 from sklearn.metrics import auc
+from sklearn.metrics import recall_score
 from sklearn.metrics._ranking import _binary_clf_curve
+
+
+
+
+def specificity_score(y_true, y_pred, labels=[0,1]):
+    TN, FP, FN, TP = confusion_matrix(y_true, y_pred, labels=labels).ravel()
+    return TN / float(TN + FP)
+
+
+def sensitivity_score(y_true, y_pred):
+    return recall_score(y_true, y_pred, average='binary') 
+
+
+
+
 
 
 def very_major_error_score(y_true, y_pred, labels=[0,1]):
