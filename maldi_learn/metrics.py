@@ -24,7 +24,17 @@ def sensitivity_score(y_true, y_pred):
     return recall_score(y_true, y_pred, average='binary') 
 
 def specificity_sensitivity_curve(y_true, y_pred, pos_label=1, sample_weight=None):
+    '''
+    specificity:    TN / (TN + FP). Value of 1 added at first position of
+                    array to ensure curve starts on axis.
 
+    specificity:    TP / (TP + FN). Value of 0 added at first position of
+                    array to ensure curve starts on axis.
+
+    thresholds:     specificity[i] and sensitivity[i] corresponds to the
+                    prediction with decision coundary of predicted positive 
+                    if score >= threshold[i]
+    '''
     fps, tps, thresholds = _binary_clf_curve(y_true,
                                              y_pred,
                                              pos_label=pos_label,
@@ -37,6 +47,9 @@ def specificity_sensitivity_curve(y_true, y_pred, pos_label=1, sample_weight=Non
     # specificity: TN / all N
     # TN = all N - FP
     specificity = (total_num_neg_samples - fps) / total_num_neg_samples
+
+    specificity = np.insert(specificity, 0, 1)
+    sensitivity = np.insert(sensitivity, 0, 0)
     return specificity, sensitivity, thresholds
 
 
