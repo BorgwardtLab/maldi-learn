@@ -20,11 +20,24 @@ def specificity_score(y_true, y_pred, labels=[0,1]):
     TN, FP, FN, TP = confusion_matrix(y_true, y_pred, labels=labels).ravel()
     return TN / float(TN + FP)
 
-
 def sensitivity_score(y_true, y_pred):
     return recall_score(y_true, y_pred, average='binary') 
 
+def specificity_sensitivity_curve(y_true, y_pred, pos_label=1, sample_weight=None):
 
+    fps, tps, thresholds = _binary_clf_curve(y_true,
+                                             y_pred,
+                                             pos_label=pos_label,
+                                             sample_weight=sample_weight)
+    
+    total_num_neg_samples = float(fps[-1])
+    total_num_pos_samples = float(tps[-1])
+    # sensitivity: TP / all P
+    sensitivity = tps / total_num_pos_samples
+    # specificity: TN / all N
+    # TN = all N - FP
+    specificity = (total_num_neg_samples - fps) / total_num_neg_samples
+    return specificity, sensitivity, thresholds
 
 
 
