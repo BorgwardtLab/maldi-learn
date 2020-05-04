@@ -13,7 +13,7 @@ from sklearn.metrics import auc
 from sklearn.metrics import recall_score
 from sklearn.metrics._ranking import _binary_clf_curve
 
-
+import numpy as np
 
 
 def specificity_score(y_true, y_pred, labels=[0,1]):
