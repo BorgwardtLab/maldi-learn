@@ -86,7 +86,7 @@ class TestCurve(unittest.TestCase):
                                                             MOCK_LABELS,
                                                             MOCK_SCORES)
         
-        spec_true = np.array([1 , 1 , 0.5, 0.5, 0.5, 0])
+        spec_true = np.array([0, 0.5, 0.5, 0.5, 1, 1])
         print('thresh', thresholds)
         print('spec', specificity, spec_true)
 
@@ -100,7 +100,7 @@ class TestCurve(unittest.TestCase):
         specificity, sensitivity, thresholds = specificity_sensitivity_curve(
                                                             MOCK_LABELS,
                                                             MOCK_SCORES)
-        sen_true = np.array([0, 0.33333333, 0.33333333, 0.66666667, 1, 1])
+        sen_true = np.array([1, 1, 0.666666666, 0.33333333, 0.333333333, 0])
         print('sen', sensitivity, sen_true)
 
         for i, sen in enumerate(sensitivity):

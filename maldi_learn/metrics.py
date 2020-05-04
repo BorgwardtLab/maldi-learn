@@ -50,7 +50,7 @@ def specificity_sensitivity_curve(y_true, y_pred, pos_label=1, sample_weight=Non
 
     specificity = np.insert(specificity, 0, 1)
     sensitivity = np.insert(sensitivity, 0, 0)
-    return specificity, sensitivity, thresholds
+    return specificity[::-1], sensitivity[::-1], thresholds[::-1]
 
 
 
