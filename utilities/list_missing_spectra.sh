@@ -8,10 +8,14 @@ for SITE in "DRIAMS-A" "DRIAMS-B" "DRIAMS-C" "DRIAMS-D"; do
   echo $SITE
   for DIRECTORY in $ROOT/*; do
     YEAR=${DIRECTORY:t}
-    ID_FILES=`ls $DIRECTORY/${YEAR}*.csv`
+    ID_FILES=("${(@f)$(ls $DIRECTORY/${YEAR}*.csv)}")
     echo "  $YEAR"
     for ID_FILE in $ID_FILES; do
-      python list_missing_spectra.py $ID_FILES /links/groups/borgwardt/Data/DRIAMS/$SITE/preprocessed/
+      echo "  $ID_FILES"
+      for TYPE in "binned_6000" "preprocessed"; do
+        echo "    $TYPE"
+        python list_missing_spectra.py $ID_FILES /links/groups/borgwardt/Data/DRIAMS/$SITE/$TYPE/
+      done
     done
   done
 done
