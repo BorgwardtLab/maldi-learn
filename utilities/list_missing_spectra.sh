@@ -11,10 +11,10 @@ for SITE in "DRIAMS-A" "DRIAMS-B" "DRIAMS-C" "DRIAMS-D"; do
     ID_FILES=("${(@f)$(ls $DIRECTORY/${YEAR}*.csv)}")
     echo "  $YEAR"
     for ID_FILE in $ID_FILES; do
-      echo "  $ID_FILES"
+      echo "  $ID_FILE"
       for TYPE in "binned_6000" "preprocessed"; do
         echo "    $TYPE"
-        python list_missing_spectra.py $ID_FILES /links/groups/borgwardt/Data/DRIAMS/$SITE/$TYPE/
+        python list_missing_spectra.py $ID_FILE /links/groups/borgwardt/Data/DRIAMS/$SITE/$TYPE/
       done
     done
   done
