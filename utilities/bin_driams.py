@@ -64,7 +64,7 @@ if __name__ == '__main__':
                 year,
                 '*',  # Load all species; we do *not* want to filter anything
                 antibiotics[year],
-                handle_missing_resistance_measurements='keep', # Keep all
+                handle_missing_resistance_measurements='keep',  # Keep all
         )
 
         # Follows the same hierarchy as the other data sets. For
@@ -105,6 +105,10 @@ if __name__ == '__main__':
             # let's play it safe and not overwrite anything.
             if os.path.exists(output_file):
                 continue
+
+            # This has the added advantage that we now *see* whenever
+            # a new spectrum is being stored.
+            tqdm.write(code)
 
             X = bv.fit_transform([spectrum])[0]
 
