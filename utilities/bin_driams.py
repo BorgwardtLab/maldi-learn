@@ -64,8 +64,7 @@ if __name__ == '__main__':
                 year,
                 '*',  # Load all species; we do *not* want to filter anything
                 antibiotics[year],
-                encoder=DRIAMSLabelEncoder(),
-                handle_missing_resistance_measurements='remove_if_all_missing',
+                handle_missing_resistance_measurements='keep', # Keep all
         )
 
         # Follows the same hierarchy as the other data sets. For
