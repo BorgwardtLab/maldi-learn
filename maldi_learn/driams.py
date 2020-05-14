@@ -306,12 +306,12 @@ class DRIAMSDataset:
         return self.y.loc[:, [c for c in self.y.columns if c not in
             _metadata_columns]].notna().sum(axis=0)
 
-    # TODO implement
     @property
     def class_ratio(self, antibiotic):
-        print(self.y.count())
+        # extract copy of series
+        ab_series = self.y[antibiotic].dropna()
         # return dict with label as key, and class fraction as value
-        return fraq_dict
+        return ab_series.value_counts(normalize=True).to_dict()
 
     def to_numpy(self, antibiotic, dtype=int, y=None):
         """Convert label feature vector to `numpy` array.
