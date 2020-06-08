@@ -33,8 +33,9 @@ dotenv.load_dotenv()
 DRIAMS_ROOT = os.getenv('DRIAMS_ROOT')
 
 # These are the columns that we consider to contain metadata for the
-# DRIAMS data set.
-_metadata_columns = ['code', 'species', 'laboratory_species']
+# DRIAMS data set. Note that they will only be used if *present*. It
+# is not an error if one of them is missing.
+_metadata_columns = ['id', 'code', 'species', 'laboratory_species']
 
 
 def _check_id_file(id_file):
@@ -587,6 +588,12 @@ def _load_metadata(
                 on_error
             )
 
+    # Not all label files might have the same meta columns available, so
+    # we only use the ones that *are* available.
+    metadata_columns_available = [
+        c for c in _metadata_columns if c in metadata.columns
+    ]
+
     # Type-cast all columns into `object`. This ensures that the label
     # encoding works correctly in all cases because `object` makes it
     # possible to handle `nan` and arbitrary strings.
@@ -595,8 +602,10 @@ def _load_metadata(
     # Ensures that all requested antibiotics are present in the
     # data frame. Afterwards, we restrict the data frame to the
     # relevant columns.
-    metadata = metadata.reindex(columns=_metadata_columns + antibiotics)
-    metadata = metadata[_metadata_columns + antibiotics]
+    metadata = metadata.reindex(
+        columns=metadata_columns_available + antibiotics
+    )
+    metadata = metadata[metadata_columns_available + antibiotics]
 
     n_antibiotics = len(antibiotics)
 
