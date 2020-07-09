@@ -55,6 +55,7 @@ if __name__ == '__main__':
                 '*',  # Load all species; we do *not* want to filter anything
                 antibiotics[year],
                 handle_missing_resistance_measurements='keep',  # Keep all
+                nrows=1000,
         )
 
         codes = driams_dataset.y['code'].values
@@ -63,10 +64,14 @@ if __name__ == '__main__':
                                    total=len(codes),
                                    desc='Spectrum'):
 
+            # Use intensity values only
+            if len(spectrum.shape) == 2:
+                spectrum = spectrum[:, 1]
+
             min_value, max_value = np.min(spectrum), np.max(spectrum)
             tic = np.sum(spectrum)
 
             print(f'*** {code} ***')
-            print(f'Min: {min_value:.2f}')
-            print(f'Max: {max_value:.2f}')
+            print(f'Min: {min_value:.08f}')
+            print(f'Max: {max_value:.08f}')
             print(f'TIC: {tic:.2f}')
