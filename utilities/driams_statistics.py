@@ -55,7 +55,7 @@ if __name__ == '__main__':
                 '*',  # Load all species; we do *not* want to filter anything
                 antibiotics[year],
                 handle_missing_resistance_measurements='keep',  # Keep all
-                nrows=1000,
+                spectra_type='binned_6000',
         )
 
         codes = driams_dataset.y['code'].values
