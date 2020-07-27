@@ -409,7 +409,7 @@ def load_driams_dataset(
     years:
         Identifier for the year, such as `2015`. Can be either a `list`
         of strings or a single `str`, in which case only one year will
-        be loaded.
+        be loaded. If set to `*`, returns all available years.
 
     species:
         Identifier for the species, such as *Staphylococcus aureus*. If
@@ -472,7 +472,11 @@ def load_driams_dataset(
     -------
     Instance of `DRIAMSDataset`, containing all loaded spectra.
     """
-    if type(years) is not list:
+    # Get all available years
+    if years == '*':
+        years = DRIAMSDatasetExplorer(root).available_years(site)
+    # Pretend that we always have a list of years
+    elif type(years) is not list:
         years = [years]
 
     all_spectra = {}
@@ -529,7 +533,7 @@ def _load_metadata(
     on_error,
     **kwargs,
 ):
-    """Internal function for loading metadata file.
+    """Load metadata file.
 
     This function does the 'heavy lifting' for loading the metadata
     files. It ensures that all desired species and antibiotics are
