@@ -1,6 +1,4 @@
-'''
-Kernels for assessing the similarity between MALDI-TOF spectra.
-'''
+"""Kernels for assessing the similarity between MALDI-TOF spectra."""
 
 from sklearn.gaussian_process.kernels import Hyperparameter
 from sklearn.gaussian_process.kernels import StationaryKernelMixin
@@ -48,29 +46,36 @@ class PIKE(StationaryKernelMixin, Kernel):
 
     @property
     def hyperparameter_sigma(self):
+        """Return current value of smoothing parameter."""
         return Hyperparameter('sigma', 'numeric', self.sigma_bounds)
 
     @property
     def requires_vector_input(self):
-        '''
-        Returns whether the kernel works only on fixed-length feature
-        vectors.
-        '''
+        """Describe kernel properties.
 
+        Returns
+        -------
+        False to indicate that the kernel does not use
+        feature fixed-length features.
+        """
         return False
 
     def __call__(self, X, Y=None, eval_gradient=False):
-        '''
+        """Evaluate kernel to return its value and, optionally, a gradient.
+
         Returns the kernel value k(X, Y) and, if desired, its gradient
-        as well.
+        as well. This is the main evaluation function. Its design uses
+        the same API as in the Gaussian Process module of `sklearn`.
 
         Parameters
         ----------
         X : array of spectra
             Left argument of the returned kernel k(X, Y)
+
         Y : array of spectra
-            Right argument of the returned kernel k(X, Y). If None, k(X, X)
-            if evaluated instead.
+            Right argument of the returned kernel k(X, Y). If None, k(X,
+            X), i.e. the diagonal, is evaluated instead.
+
         eval_gradient : bool (optional, default=False)
             Determines whether the gradient with respect to the kernel
             hyperparameter is determined. Only supported when Y is None.
@@ -83,8 +88,7 @@ class PIKE(StationaryKernelMixin, Kernel):
             The gradient of the kernel k(X, X) with respect to the
             hyperparameter of the kernel. Only returned when eval_gradient
             is True.
-        '''
-
+        """
         def evaluate_kernel(x, y):
 
             # Get the positions (masses) of the two spectra. This could
@@ -159,21 +163,23 @@ class PIKE(StationaryKernelMixin, Kernel):
             return pairwise_kernels(X, Y, metric=evaluate_kernel)
 
     def diag(self, X):
-        '''
+        """Return diagonal value of the kernel.
+
         Returns the diagonal of the kernel k(X, X). The result of this
-        method is identical to np.diag(self(X)); however, it can be
-        evaluated more efficiently since only the diagonal is evaluated.
+        method is identical to calling `np.diag(self(X))`; however, it
+        can be evaluated more efficiently since only the diagonal is
+        evaluated.
 
         Parameters
         ----------
         X : array, shape (n_samples_X, n_features)
             Left argument of the returned kernel k(X, Y)
+
         Returns
         -------
         K_diag : array, shape (n_samples_X,)
             Diagonal of kernel k(X, X)
-        '''
-
+        """
         diag_values = np.zeros(len(X))
 
         for i, x in enumerate(X):
@@ -196,6 +202,7 @@ class PIKE(StationaryKernelMixin, Kernel):
         return diag_values / (4 * self.sigma * np.pi)
 
     def __repr__(self):
+        """Return string representation of kernel."""
         return f'{self.__class__.__name__}({self.sigma:.8f})'
 
 
