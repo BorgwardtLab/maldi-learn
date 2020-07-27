@@ -9,35 +9,38 @@ from sklearn.gaussian_process.kernels import Kernel
 from sklearn.metrics import pairwise_distances
 from sklearn.metrics import pairwise_kernels
 
-from scipy.spatial.distance import cdist
-from scipy.spatial.distance import pdist
-
 import numpy as np
 import sys
 
 
-class DiffusionKernel(StationaryKernelMixin, Kernel):
-    '''
+class PIKE(StationaryKernelMixin, Kernel):
+    """Peak Information Kernel (PIKE).
+
     Implements a diffusion kernel that performs iterative smoothing of
     a MALDI-TOF spectrum.
-    '''
+    """
 
     def __init__(self, sigma=1.0, sigma_bounds=(1e-5, 1e5)):
-        '''
-        Initialises a new instance of the kernel.
+        """Initialise a new instance of the kernel.
 
-        Parameters:
-            sigma: Smoothing parameter
-            sigma_bounds: Tuple specifying the minimum and maximum bound
-            of the sigma scale parameter.
-        '''
+        Parameters
+        ----------
+        sigma : float
+            Smoothing parameter. Higher values imply that the distance
+            between peaks is progressively being adjusted.
 
+        sigma_bounds : tuple of floats
+            Tuple specifying the minimum and maximum bound of the sigma
+            scale parameter.
+        """
         self.sigma = sigma
         self.sigma_bounds = sigma_bounds
 
         def passthrough(*args, **kwargs):
             return args
 
+        # TODO: this is not the best way of handling the calculation,
+        # but `pairwise_distances` is making this so much easier.
         module = sys.modules['sklearn.metrics.pairwise']
         module.check_pairwise_arrays = passthrough
 
@@ -194,3 +197,8 @@ class DiffusionKernel(StationaryKernelMixin, Kernel):
 
     def __repr__(self):
         return f'{self.__class__.__name__}({self.sigma:.8f})'
+
+
+# Kept in order to be compatible with older versions of the library.
+# This ensures that code does not have to be changed.
+DiffusionKernel = PIKE
