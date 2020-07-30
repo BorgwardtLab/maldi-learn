@@ -35,3 +35,9 @@ $ pyenv install 3.7.4  # Install python 3.7.4 using pyenv
 $ pyenv local 3.7.4    # Mark python version 3.7.4 for usage in this folder
 $ poetry install       # Setup the virtual environment for development
 ```
+
+## Examples
+
+The folder `examples` contains scripts that demonstrate a part of the
+API. We recommend to start with
+[`classification.py`](examples/classification.py).
