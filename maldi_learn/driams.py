@@ -377,8 +377,7 @@ class DRIAMSDataset:
         if y is None:
             y = self.y
 
-        # return y as numpy array as input for classification
-        # TODO: do we need this additional conversion?
+        # TODO: is it necessary to ignore all metadata columns here?
         y = y.loc[:, [c for c in self.y.columns if c not in _metadata_columns]]
 
         return y[antibiotic].to_numpy().astype(dtype)
