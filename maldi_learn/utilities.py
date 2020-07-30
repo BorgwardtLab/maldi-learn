@@ -1,7 +1,4 @@
-"""Utilities functions for maldi-learn package.
-
-It contains several functions used the main scripts.
-"""
+"""Utility functions for maldi-learn package."""
 
 import itertools
 

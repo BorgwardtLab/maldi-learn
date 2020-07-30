@@ -27,7 +27,7 @@ driams_dataset = load_driams_dataset(
             'DRIAMS-A',
             ['2015', '2017'],
             'Staphylococcus aureus',
-            ['Ciprofloxacin', 'Penicillin.ohne.Meningitis'],
+            ['Ciprofloxacin', 'Penicillin'],
             encoder=DRIAMSLabelEncoder(),
             handle_missing_resistance_measurements='remove_if_all_missing',
 )
