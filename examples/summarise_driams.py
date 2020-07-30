@@ -41,8 +41,3 @@ if __name__ == '__main__':
             for antibiotic in sorted(antibiotics[year]):
                 counts = y[antibiotic].value_counts().to_dict()
                 print(antibiotic, counts)
-
-        # FIXME: show all sites, eventually...
-        break
-
-    
