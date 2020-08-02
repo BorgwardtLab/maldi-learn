@@ -8,7 +8,7 @@ import argparse
 import dotenv
 import os
 
-
+import numpy as np
 import pandas as pd
 
 dotenv.load_dotenv()
@@ -60,3 +60,31 @@ if __name__ == '__main__':
     # species have been assigned.
     assert (metadata_left.id == metadata_right.id).all()
     assert (metadata_left.species == metadata_right.species).all()
+
+    antibiotics_left = [
+        c for c in metadata_left.columns if c[0].isupper()
+    ]
+
+    antibiotics_right = [
+        c for c in metadata_right.columns if c[0].isupper()
+    ]
+
+    # Ensures that the assay that was employed is the same.
+    assert antibiotics_left == antibiotics_right
+
+    antibiotics = antibiotics_left
+
+    for (i1, row1), (i2, row2) in zip(metadata_left.iterrows(),
+                                      metadata_right.iterrows()):
+        row1 = row1[antibiotics]
+        row2 = row2[antibiotics]
+
+        for a, left, right in zip(antibiotics, row1.values, row2.values):
+            # Since 'NaN' != 'NaN' in all cases, let's handle this case
+            # separately; we are not really interested in it.
+            if type(left) is float and type(right) is float:
+                if np.isnan(left) and np.isnan(right):
+                    continue
+
+            if left != right:
+                print(f'{a}: L = {left}, R = {right}')
