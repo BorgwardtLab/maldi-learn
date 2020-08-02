@@ -73,11 +73,17 @@ if __name__ == '__main__':
     assert antibiotics_left == antibiotics_right
 
     antibiotics = antibiotics_left
+    n_differences = 0
 
     for (i1, row1), (i2, row2) in zip(metadata_left.iterrows(),
                                       metadata_right.iterrows()):
+
+        print(f'Processing ID = {row1.id}...')
+
         row1 = row1[antibiotics]
         row2 = row2[antibiotics]
+
+        detected_difference = False
 
         for a, left, right in zip(antibiotics, row1.values, row2.values):
             # Since 'NaN' != 'NaN' in all cases, let's handle this case
@@ -87,4 +93,9 @@ if __name__ == '__main__':
                     continue
 
             if left != right:
-                print(f'{a}: L = {left}, R = {right}')
+                print(f'\t{a}: left = {left}, right = {right}')
+                detected_difference = True
+
+        n_differences += detected_difference
+
+    print(f'{n_differences}/{len(metadata_left)} rows differ')
