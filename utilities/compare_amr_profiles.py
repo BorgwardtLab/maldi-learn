@@ -1,0 +1,62 @@
+#!/usr/bin/env python3
+#
+# Compares the AMR profiles between two sites and prints out the
+# differences. This assumes that the same spectra have been measured for
+# both sites.
+
+import argparse
+import dotenv
+import os
+
+
+import pandas as pd
+
+dotenv.load_dotenv()
+DRIAMS_ROOT = os.getenv('DRIAMS_ROOT')
+
+if __name__ == '__main__':
+    parser = argparse.ArgumentParser()
+    parser.add_argument(
+            '-l', '--left',
+            default='DRIAMS-E',
+            help='First site to compare'
+    )
+    parser.add_argument(
+            '-r', '--right',
+            default='DRIAMS-F',
+            help='Second site to compare'
+    )
+
+    args = parser.parse_args()
+
+    # TODO: make years configurable
+    filename_left = os.path.join(
+        DRIAMS_ROOT, args.left, 'id', '2019', f'2019_clean.csv'
+    )
+
+    metadata_left = pd.read_csv(
+                filename_left,
+                low_memory=False,
+                na_values=['-'],        # additional way to encode `Nan`
+                keep_default_na=True,   # keep default `NaN` encodings
+    )
+
+    # TODO: make years configurable
+    filename_right = os.path.join(
+        DRIAMS_ROOT, args.right, 'id', '2019', f'2019_clean.csv'
+    )
+
+    metadata_right = pd.read_csv(
+                filename_right,
+                low_memory=False,
+                na_values=['-'],        # additional way to encode `Nan`
+                keep_default_na=True,   # keep default `NaN` encodings
+    )
+
+    metadata_left = metadata_left.sort_values(by=['id'])
+    metadata_right = metadata_right.sort_values(by=['id'])
+
+    # Check that the same spectra have been measured here and the same
+    # species have been assigned.
+    assert (metadata_left.id == metadata_right.id).all()
+    assert (metadata_left.species == metadata_right.species).all()
