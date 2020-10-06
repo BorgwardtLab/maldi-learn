@@ -32,6 +32,10 @@ if __name__ == '__main__':
                     os.path.splitext(filename)[0]
                 )
 
+    # This will significantly speed up the subsequent queries because
+    # we are not dealing with a list any more. 
+    all_spectra = set(all_spectra)
+
     for code in df['code']:
         if code not in all_spectra:
             print(code)

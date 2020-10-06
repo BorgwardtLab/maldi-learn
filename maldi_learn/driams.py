@@ -33,8 +33,43 @@ dotenv.load_dotenv()
 DRIAMS_ROOT = os.getenv('DRIAMS_ROOT')
 
 # These are the columns that we consider to contain metadata for the
-# DRIAMS data set.
-_metadata_columns = ['code', 'species', 'laboratory_species']
+# DRIAMS data set. Note that they will only be used if *present*. It
+# is not an error if one of them is missing.
+_metadata_columns = ['id', 'code', 'species', 'laboratory_species']
+
+
+class DRIAMSLabelEncoder(LabelEncoder):
+    """Encoder for DRIAMS labels.
+
+    Encodes antibiotic resistance measurements in a standardised manner.
+    Specifically, *resistant* or *intermediate* measurements are will be
+    converted to `1`, while *suspectible* measurements will be converted
+    to `0`.
+    """
+
+    def __init__(self):
+        """Create new instance of the encoder."""
+        # These are the default encodings for the DRIAMS dataset. If
+        # other values show up, they will not be handled; this is by
+        # design.
+        encodings = {
+            'R': 1,
+            'I': 1,
+            'S': 0,
+            'S(2)': np.nan,
+            'R(1)': np.nan,
+            'R(2)': np.nan,
+            'L(1)': np.nan,
+            'I(1)': np.nan,
+            'I(1), S(1)': np.nan,
+            'R(1), I(1)': np.nan,
+            'R(1), S(1)': np.nan,
+            'R(1), I(1), S(1)': np.nan
+        }
+
+        # Ignore the metadata columns to ensure that these values will
+        # not be replaced anywhere else.
+        super().__init__(encodings, _metadata_columns)
 
 
 def _check_id_file(id_file):
@@ -342,8 +377,7 @@ class DRIAMSDataset:
         if y is None:
             y = self.y
 
-        # return y as numpy array as input for classification
-        # TODO: do we need this additional conversion?
+        # TODO: is it necessary to ignore all metadata columns here?
         y = y.loc[:, [c for c in self.y.columns if c not in _metadata_columns]]
 
         return y[antibiotic].to_numpy().astype(dtype)
@@ -380,7 +414,7 @@ def load_driams_dataset(
     years,
     species,
     antibiotics,
-    encoder=None,
+    encoder=DRIAMSLabelEncoder(),
     handle_missing_resistance_measurements='remove_if_all_missing',
     spectra_type='preprocessed',
     on_error='raise',
@@ -393,44 +427,46 @@ def load_driams_dataset(
     a list of antibiotics, this function loads a dataset, handles
     missing values, and returns a `DRIAMSDataset` class instance.
 
-    Notice that no additional post-processing will be performed. The
-    spectra might thus have different lengths are not directly suitable
-    for downstream processing in, say, a `scikit-learn` pipeline.
+    Note that no additional post-processing will be performed. The
+    spectra might have different lengths that cannot be used for a
+    downstream processing or analysis task, or in a `scikit-learn`
+    pipeline.
+
+    To change this behaviour, load a certain type of spectra, such
+    as `binned_6000`.
 
     Parameters
     ----------
-    root:
+    root : str
         Root path to the DRIAMS dataset folder.
 
-    site:
+    site : str
         Identifier of a site, such as `DRIAMS-A`.
 
-    years:
+    years : str or list of str
         Identifier for the year, such as `2015`. Can be either a `list`
         of strings or a single `str`, in which case only one year will
-        be loaded.
+        be loaded. If set to `*`, returns all available years.
 
-    species:
+    species : str
         Identifier for the species, such as *Staphylococcus aureus*. If
         set to `*`, returns all species, thus performing no filtering.
 
-    antibiotics:
+    antibiotics : str or list of str
         Identifier for the antibiotics to use, such as *Ciprofloxacin*.
         Can be either a `list` of strings or a single `str`, in which
         case only a single antibiotic will be loaded.
 
-    encoder:
+    encoder : `LabelEncoder` instance or `None`
         If set, provides a mechanism for encoding labels into numbers.
         This will be applied *prior* to the missing value handling, so
         it is a simple strategy to remove invalid values. If no encoder
-        is set, only missing values in the original data will be
-        handled.
+        is set (i.e. the parameter is `None`), only missing values in
+        the original data will be handled. By default, an encoder that
+        should be suitable for most tasks is used; `DRIAMSLabelEncoder`
+        implements our preferred encoding of labels.
 
-        Suitable values for `encoder` are instances of the
-        `DRIAMSLabelEncoder` class, which performs our preferred
-        encoding of labels.
-
-    handle_missing_resistance_measurements:
+    handle_missing_resistance_measurements : str
         Strategy for handling missing resistance measurements. Can be
         one of the following:
 
@@ -471,7 +507,11 @@ def load_driams_dataset(
     -------
     Instance of `DRIAMSDataset`, containing all loaded spectra.
     """
-    if type(years) is not list:
+    # Get all available years
+    if years == '*':
+        years = DRIAMSDatasetExplorer(root).available_years(site)
+    # Pretend that we always have a list of years
+    elif type(years) is not list:
         years = [years]
 
     all_spectra = {}
@@ -528,7 +568,7 @@ def _load_metadata(
     on_error,
     **kwargs,
 ):
-    """Internal function for loading metadata file.
+    """Load metadata file.
 
     This function does the 'heavy lifting' for loading the metadata
     files. It ensures that all desired species and antibiotics are
@@ -587,6 +627,12 @@ def _load_metadata(
                 on_error
             )
 
+    # Not all label files might have the same meta columns available, so
+    # we only use the ones that *are* available.
+    metadata_columns_available = [
+        c for c in _metadata_columns if c in metadata.columns
+    ]
+
     # Type-cast all columns into `object`. This ensures that the label
     # encoding works correctly in all cases because `object` makes it
     # possible to handle `nan` and arbitrary strings.
@@ -595,8 +641,10 @@ def _load_metadata(
     # Ensures that all requested antibiotics are present in the
     # data frame. Afterwards, we restrict the data frame to the
     # relevant columns.
-    metadata = metadata.reindex(columns=_metadata_columns + antibiotics)
-    metadata = metadata[_metadata_columns + antibiotics]
+    metadata = metadata.reindex(
+        columns=metadata_columns_available + antibiotics
+    )
+    metadata = metadata[metadata_columns_available + antibiotics]
 
     n_antibiotics = len(antibiotics)
 
@@ -631,37 +679,3 @@ def _merge_years(all_spectra, all_metadata):
         'Duplicated codes in different years.'
 
     return spectra, metadata
-
-
-class DRIAMSLabelEncoder(LabelEncoder):
-    """Encoder for DRIAMS labels.
-
-    Encodes antibiotic resistance measurements in a standardised manner.
-    Specifically, *resistant* or *intermediate* measurements are will be
-    converted to `1`, while *suspectible* measurements will be converted
-    to `0`.
-    """
-
-    def __init__(self):
-        """Create new instance of the encoder."""
-        # These are the default encodings for the DRIAMS dataset. If
-        # other values show up, they will not be handled; this is by
-        # design.
-        encodings = {
-            'R': 1,
-            'I': 1,
-            'S': 0,
-            'S(2)': np.nan,
-            'R(1)': np.nan,
-            'R(2)': np.nan,
-            'L(1)': np.nan,
-            'I(1)': np.nan,
-            'I(1), S(1)': np.nan,
-            'R(1), I(1)': np.nan,
-            'R(1), S(1)': np.nan,
-            'R(1), I(1), S(1)': np.nan
-        }
-
-        # Ignore the metadata columns to ensure that these values will
-        # not be replaced anywhere else.
-        super().__init__(encodings, _metadata_columns)
