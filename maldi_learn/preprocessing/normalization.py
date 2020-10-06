@@ -97,3 +97,24 @@ class ScaleNormalizer(BaseEstimator, TransformerMixin):
         return [
             self._normalize_spectrum(spectrum) for spectrum in X
         ]
+
+
+class StandardScaleNormalizer(BaseEstimator, TransformerMixin):
+    """
+    Normalizes a set of spectra such that each bin has a mean of zero
+    and a standard deviation of one.
+    """
+    def _normalize_spectrum(self, spectrum):
+        spectrum = spectrum - self.mean
+        spectrum = spectrum / self.std
+        return spectrum
+
+    def fit(self, X):
+        self.mean = np.mean(np.array(X), axis=0)
+        self.std = np.std(np.array(X), axis=0)
+        return self
+
+    def transform(self, X):
+        return [
+            self._normalize_spectrum(spectrum) for spectrum in X
+        ]
