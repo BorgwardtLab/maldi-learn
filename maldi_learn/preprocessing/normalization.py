@@ -105,7 +105,8 @@ class StandardScaleNormalizer(BaseEstimator, TransformerMixin):
     and a standard deviation of one.
     """
     def _normalize_spectrum(self, spectrum):
-        spectrum_scaled = (spectrum.intensities - self.mean) / self.std
+        spectrum_scaled  = spectrum.copy()
+        spectrum_scaled[:,1] = (spectrum.intensities - self.mean) / self.std
         return spectrum_scaled
 
     def fit(self, X):
