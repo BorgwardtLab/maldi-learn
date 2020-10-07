@@ -109,7 +109,7 @@ class StandardScaleNormalizer(BaseEstimator, TransformerMixin):
         return spectrum_scaled
 
     def fit(self, X):
-        l = [s.intensities for s in driams_dataset.X]
+        l = [s.intensities for s in X]
         self.mean = np.mean(np.array(l), axis=0)
         self.std = np.std(np.array(l), axis=0)
         return self
