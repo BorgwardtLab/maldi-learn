@@ -418,6 +418,7 @@ def load_driams_dataset(
     handle_missing_resistance_measurements='remove_if_all_missing',
     spectra_type='preprocessed',
     on_error='raise',
+    id_suffix='clean',
     **kwargs,
 ):
     """Load DRIAMS data set for a specific site and specific year.
@@ -496,6 +497,11 @@ def load_driams_dataset(
         code will raise an exception for every error it encounters. If
         set to 'warn' or 'warning', only a warning will be shown.
 
+    id_suffix : str
+        An optional suffix that is applied when searching for ID files.
+        This parameter does not have to be changed during normal
+        operations and is only useful when debugging.
+
     kwargs:
         Optional keyword arguments for changing the downstream behaviour
         of some functions. At present, the following keys are supported:
@@ -519,7 +525,20 @@ def load_driams_dataset(
 
     for year in years:
         path_X = os.path.join(root, site, spectra_type, year)
-        id_file = os.path.join(root, site, 'id', year, f'{year}_clean.csv')
+
+        # Determine filename portion for loading the ID file
+        if id_suffix is not None:
+            filename = f'{year}_{id_suffix}.csv'
+        else:
+            filename = f'{year}.csv'
+
+        id_file = os.path.join(
+            root,
+            site,
+            'id',
+            year,
+            filename
+        )
 
         # Metadata contains all information that we have about the
         # individual spectra and the selected antibiotics.
