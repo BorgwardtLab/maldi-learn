@@ -35,7 +35,13 @@ DRIAMS_ROOT = os.getenv('DRIAMS_ROOT')
 # These are the columns that we consider to contain metadata for the
 # DRIAMS data set. Note that they will only be used if *present*. It
 # is not an error if one of them is missing.
-_metadata_columns = ['id', 'code', 'species', 'laboratory_species']
+_metadata_columns = [
+    'id',
+    'code',
+    'species',
+    'laboratory_species',
+    'FALL_comp',
+]
 
 
 class DRIAMSLabelEncoder(LabelEncoder):
