@@ -419,10 +419,9 @@ def load_spectrum(filename, on_error):
         _raise_or_warn(
                 SpectraNotFoundException,
                 SpectraNotFoundWarning,
-                f'Spectra {filename} was not found',
+                f'Spectra filename does not exist: {filename}',
                 on_error
         )
-        warnings.warn(f'Spectra filename does not exist: {filename}')
         return None
 
 
