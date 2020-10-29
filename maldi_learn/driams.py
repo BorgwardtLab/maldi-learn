@@ -577,7 +577,7 @@ def load_driams_dataset(
         ]
 
         spectra = [
-            load_spectrum(f) for f in spectra_files
+            load_spectrum(f, on_error) for f in spectra_files
         ]
 
         problematic_codes = [
