@@ -587,7 +587,7 @@ def load_driams_dataset(
             c for c, s in zip(codes, spectra) if s is None
         ]
 
-        metadata = metadata[~metadata['code'].isin(missing_code)]
+        metadata = metadata[~metadata['code'].isin(missing_codes)]
         spectra = [
             s for s in spectra if s is not None
         ]
