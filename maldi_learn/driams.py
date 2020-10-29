@@ -383,7 +383,7 @@ class DRIAMSDataset:
         return y[antibiotic].to_numpy().astype(dtype)
 
 
-def load_spectrum(filename):
+def load_spectrum(filename, on_error):
     """Load DRIAMS MALDI-TOF spectrum.
 
     This function encapsulates loading a MALDI-TOF spectrum from the
@@ -399,13 +399,23 @@ def load_spectrum(filename):
     -------
     Instance of `MaldiTofSpectrum` class, containing the spectrum.
     """
-    return MaldiTofSpectrum(
-                pd.read_csv(
-                    filename,
-                    sep=' ',
-                    comment='#',
-                    engine='c').values
-            )
+    if os.path.isfile(filename):
+        return MaldiTofSpectrum(
+                    pd.read_csv(
+                        filename,
+                        sep=' ',
+                        comment='#',
+                        engine='c').values
+                )
+    else:
+        _raise_or_warn(
+                SpectraNotFoundException,
+                SpectraNotFoundWarning,
+                f'Spectra {filename} was not found',
+                on_error
+        )
+        warnings.warn(f'Spectra filename does not exist: {filename}')
+        return None
 
 
 def load_driams_dataset(
@@ -551,6 +561,16 @@ def load_driams_dataset(
 
         if problematic_codes:
             warnings.warn(f'Found problematic codes: {problematic_codes}')
+
+        missing_codes = [
+            c for c, s in zip(codes, spectra) if s is None
+        ]
+
+        # Remove missing spectra from metadata and spectra
+        metadata = metadata[~metadata['code'].isin(missing_code)]
+        spectra = [
+            s for s in spectra if s is not None
+        ]
 
         all_spectra[year] = spectra
         all_metadata[year] = metadata
