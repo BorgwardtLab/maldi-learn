@@ -25,6 +25,17 @@ class SpeciesNotFoundWarning(UserWarning):
     """Warning to show if a species was not found."""
 
 
+class SpectraNotFoundException(ValueError):
+    """Exception to raise if a spectra was not found."""
+
+    def __init__(self, message):
+        super().__init__(message)
+
+
+class SpectraNotFoundWarning(UserWarning):
+    """Warning to show if a spectra was not found."""
+
+
 def _raise_or_warn(exception, warning, message, behaviour):
     """Raise exception or show warning.
 
