@@ -20,6 +20,8 @@ from maldi_learn.exceptions import AntibioticNotFoundException
 from maldi_learn.exceptions import AntibioticNotFoundWarning
 from maldi_learn.exceptions import SpeciesNotFoundException
 from maldi_learn.exceptions import SpeciesNotFoundWarning
+from maldi_learn.exceptions import SpectraNotFoundException
+from maldi_learn.exceptions import SpectraNotFoundWarning
 from maldi_learn.exceptions import _raise_or_warn
 
 
