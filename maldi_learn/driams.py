@@ -582,22 +582,24 @@ def load_driams_dataset(
             load_spectrum(f, on_error) for f in spectra_files
         ]
 
+        # Remove missing spectra from metadata and spectra
+        missing_codes = [
+            c for c, s in zip(codes, spectra) if s is None
+        ]
+
+        metadata = metadata[~metadata['code'].isin(missing_code)]
+        spectra = [
+            s for s in spectra if s is not None
+        ]
+        codes = metadata.code
+
+        # Indentify codes with NaNs in spectrum
         problematic_codes = [
             c for c, s in zip(codes, spectra) if np.isnan(s).any()
         ]
 
         if problematic_codes:
             warnings.warn(f'Found problematic codes: {problematic_codes}')
-
-        missing_codes = [
-            c for c, s in zip(codes, spectra) if s is None
-        ]
-
-        # Remove missing spectra from metadata and spectra
-        metadata = metadata[~metadata['code'].isin(missing_code)]
-        spectra = [
-            s for s in spectra if s is not None
-        ]
 
         all_spectra[year] = spectra
         all_metadata[year] = metadata
