@@ -12,9 +12,7 @@ from sklearn.model_selection import train_test_split
 def _check_y(y):
     """Check whether a given label data frame is valid."""
     assert type(y) is pd.DataFrame
-
     assert 'species' in y.columns
-    assert 'code' in y.columns
 
     # TODO: check whether other checks are required to make this a valid
     # data frame.
