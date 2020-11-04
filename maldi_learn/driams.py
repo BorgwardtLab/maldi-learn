@@ -280,7 +280,7 @@ class DRIAMSDatasetExplorer:
         """Return available sites in the data set."""
         return self._get_available_sites()
 
-    def metadata_fingerprints(self, site):
+    def metadata_fingerprints(self, site, id_suffix='clean'):
         """Return available metadata filenames and their fingerprints.
 
         This function is a purely descriptive function whose goal is to
@@ -292,6 +292,10 @@ class DRIAMSDatasetExplorer:
         site : str
             Specifies which site should be used for the fingerprint
             information.
+
+        id_suffix : str
+            Optional suffix for specifying that different versions of
+            the ID files shall be used.
         """
         hashes = {}
         for year in self.available_years(site):
@@ -300,7 +304,7 @@ class DRIAMSDatasetExplorer:
                         site,
                         'id',
                         year,
-                        f'{year}_clean.csv'
+                        f'{year}_{id_suffix}.csv'
                 )
 
             df = pd.read_csv(path, low_memory=False)
