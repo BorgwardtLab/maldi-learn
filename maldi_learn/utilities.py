@@ -7,6 +7,7 @@ import pandas as pd
 
 from sklearn.preprocessing import LabelEncoder
 from sklearn.model_selection import train_test_split
+from sklearn.utils import shuffle
 
 
 def _check_y(y):
@@ -14,8 +15,56 @@ def _check_y(y):
     assert type(y) is pd.DataFrame
     assert 'species' in y.columns
 
-    # TODO: check whether other checks are required to make this a valid
-    # data frame.
+
+def case_based_stratification(
+    y,
+    antibiotic,
+    test_size=0.20,
+    random_state=123
+):
+    """Stratify while taking patient case information into account."""
+    unique_groups = y.groupby('fall_comp').aggregate(
+        {
+            antibiotic: 'mean',
+            'species': 'first',
+        }
+    )
+    unique_groups[antibiotic] = unique_groups[antibiotic].round()
+
+    y = y.reset_index(drop=True)
+
+    train_index, test_index = stratify_by_species_and_label(
+        unique_groups,
+        antibiotic=antibiotic,
+        test_size=test_size,
+        random_state=random_state,
+    )
+
+    train_index = unique_groups.iloc[train_index]
+    test_index = unique_groups.iloc[test_index]
+
+    # Make the fall_comp column, which has become an index, into
+    # a column again.
+    train_index.reset_index(inplace=True)
+    test_index.reset_index(inplace=True)
+
+    train_id = train_index['fall_comp'].values
+    test_id = test_index['fall_comp'].values
+
+    train_index = y.query('fall_comp in @train_id').index
+    test_index = y.query('fall_comp in @test_id').index
+
+    train_index = shuffle(
+        train_index,
+        random_state=random_state
+    )
+
+    test_index = shuffle(
+        test_index,
+        random_state=random_state
+    )
+
+    return train_index, test_index
 
 
 def stratify_by_species_and_label(
