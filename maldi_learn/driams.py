@@ -99,6 +99,21 @@ class DRIAMSDateFilter:
         raise NotImplementedError('Not yet implemented')
 
 
+class DRIAMSSpeciesFilter:
+    def __init__(self, species=[]):
+        if type(species) is not list:
+            self.species = [species]
+        else:
+            self.species = species
+
+    def __call__(self, row):
+        for species in self.species:
+            if species in row['species']:
+                return True
+
+        return False
+
+
 def filter_by_machine_type(row):
     return 'MALDI1' in row['code']
 
@@ -636,7 +651,7 @@ def load_driams_dataset(
             print('Filtering (before):', len(metadata))
 
             driams_filter = DRIAMSFilter(filters)
-            mask = metadata.apply(driams_filter, axis=1, broadcast=True)
+            mask = metadata.apply(driams_filter, axis=1)
             metadata = metadata[mask]
 
             print('Filtering (after):', len(metadata))
