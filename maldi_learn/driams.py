@@ -24,6 +24,7 @@ from maldi_learn.exceptions import SpectraNotFoundException
 from maldi_learn.exceptions import SpectraNotFoundWarning
 from maldi_learn.exceptions import _raise_or_warn
 
+from maldi_learn.filters import DRIAMSFilter
 
 # Pulls in the environment variables in order to simplify the access to
 # the root directory.
@@ -440,7 +441,7 @@ def load_driams_dataset(
     spectra_type='preprocessed',
     on_error='raise',
     id_suffix='clean',
-    filters=[],
+    extra_filters=[],
     **kwargs,
 ):
     """Load DRIAMS data set for a specific site and specific year.
@@ -524,6 +525,11 @@ def load_driams_dataset(
         This parameter does not have to be changed during normal
         operations and is only useful when debugging.
 
+    extra_filters : list of callable
+        Optional filter functions that will be applied to the data set
+        before returning it to the user. Filters will be applied in the
+        exact ordering in which they are supplied to this function.
+
     kwargs:
         Optional keyword arguments for changing the downstream behaviour
         of some functions. At present, the following keys are supported:
@@ -574,15 +580,10 @@ def load_driams_dataset(
             **kwargs,
         )
 
-        if filters:
-
-            print('Filtering (before):', len(metadata))
-
-            driams_filter = DRIAMSFilter(filters)
+        if extra_filters:
+            driams_filter = DRIAMSFilter(extra_filters)
             mask = metadata.apply(driams_filter, axis=1)
             metadata = metadata[mask]
-
-            print('Filtering (after):', len(metadata))
 
         # The codes are used to uniquely identify the spectra that we can
         # load. They are required for matching files and metadata.

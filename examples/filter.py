@@ -8,8 +8,9 @@ import dotenv
 import os
 
 from maldi_learn.driams import load_driams_dataset
-from maldi_learn.driams import DRIAMSSpeciesFilter
-from maldi_learn.driams import filter_by_machine_type
+
+from maldi_learn.filters import DRIAMSSpeciesFilter
+from maldi_learn.filters import filter_by_machine_type
 
 
 dotenv.load_dotenv()
@@ -23,7 +24,7 @@ driams_dataset = load_driams_dataset(
             'Ciprofloxacin',
             handle_missing_resistance_measurements='keep',
             nrows=200,
-            filters=[
+            extra_filters=[
                 filter_by_machine_type,
                 DRIAMSSpeciesFilter(['Pseudomonas', 'coli'])
             ],
