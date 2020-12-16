@@ -4,8 +4,6 @@ This is the main module for the DRIAMS data set. It contains general
 exploration classes and loaders.
 """
 
-import dateparser
-import datetime
 import dotenv
 import hashlib
 import os
@@ -26,6 +24,7 @@ from maldi_learn.exceptions import SpectraNotFoundException
 from maldi_learn.exceptions import SpectraNotFoundWarning
 from maldi_learn.exceptions import _raise_or_warn
 
+from maldi_learn.filters import DRIAMSFilter
 
 # Pulls in the environment variables in order to simplify the access to
 # the root directory.
@@ -45,77 +44,8 @@ _metadata_columns = [
     'species',
     'laboratory_species',
     'case_no',
+    'acquisition_date'
 ]
-
-
-class DRIAMSFilter:
-    """Generic filter class for spectra."""
-
-    def __init__(self, filters=[]):
-        self.filters = filters
-
-    def __call__(self, row):
-        result = True
-        for filter_fn in self.filters:
-            result = result & filter_fn(row)
-
-        return result
-
-
-class DRIAMSDateRangeFilter:
-    def __init__(self, date_from, date_to, date_col='acquisition_date'):
-        self.date_from = dateparser.parse(date_from)
-        self.date_to = dateparser.parse(date_to)
-        self.date_col = date_col
-
-        assert self.date_to is not None
-        assert self.date_from is not None
-
-    def __call__(self, row):
-        date = dateparser.parse(row[self.date_col])
-
-        assert date is not None
-
-        return self.date_to <= date <= self.date_from
-
-
-class DRIAMSDateFilter:
-    def __init__(self, date, date_col='acquisition_date'):
-        self.date = dateparser.parse(
-            date,
-            settings={
-                'PREFER_DAY_OF_MONTH': 'last'
-            }
-        )
-        self.date_col = date_col
-
-        assert self.date is not None
-
-    def __call__(self, row):
-        date = dateparser.parse(row[self.date_col])
-
-        assert date is not None
-
-        raise NotImplementedError('Not yet implemented')
-
-
-class DRIAMSSpeciesFilter:
-    def __init__(self, species=[]):
-        if type(species) is not list:
-            self.species = [species]
-        else:
-            self.species = species
-
-    def __call__(self, row):
-        for species in self.species:
-            if species in row['species']:
-                return True
-
-        return False
-
-
-def filter_by_machine_type(row):
-    return 'MALDI1' in row['code']
 
 
 class DRIAMSLabelEncoder(LabelEncoder):
@@ -512,7 +442,7 @@ def load_driams_dataset(
     spectra_type='preprocessed',
     on_error='raise',
     id_suffix='clean',
-    filters=[],
+    extra_filters=[],
     **kwargs,
 ):
     """Load DRIAMS data set for a specific site and specific year.
@@ -596,6 +526,11 @@ def load_driams_dataset(
         This parameter does not have to be changed during normal
         operations and is only useful when debugging.
 
+    extra_filters : list of callable
+        Optional filter functions that will be applied to the data set
+        before returning it to the user. Filters will be applied in the
+        exact ordering in which they are supplied to this function.
+
     kwargs:
         Optional keyword arguments for changing the downstream behaviour
         of some functions. At present, the following keys are supported:
@@ -646,15 +581,10 @@ def load_driams_dataset(
             **kwargs,
         )
 
-        if filters:
-
-            print('Filtering (before):', len(metadata))
-
-            driams_filter = DRIAMSFilter(filters)
+        if extra_filters:
+            driams_filter = DRIAMSFilter(extra_filters)
             mask = metadata.apply(driams_filter, axis=1)
             metadata = metadata[mask]
-
-            print('Filtering (after):', len(metadata))
 
         # The codes are used to uniquely identify the spectra that we can
         # load. They are required for matching files and metadata.
