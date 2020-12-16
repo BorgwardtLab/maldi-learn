@@ -23,7 +23,7 @@ def case_based_stratification(
     random_state=123
 ):
     """Stratify while taking patient case information into account."""
-    unique_groups = y.groupby('fall_comp').aggregate(
+    unique_groups = y.groupby('case_no').aggregate(
         {
             antibiotic: 'mean',
             'species': 'first',
@@ -43,16 +43,16 @@ def case_based_stratification(
     train_index = unique_groups.iloc[train_index]
     test_index = unique_groups.iloc[test_index]
 
-    # Make the fall_comp column, which has become an index, into
+    # Make the case_no column, which has become an index, into
     # a column again.
     train_index.reset_index(inplace=True)
     test_index.reset_index(inplace=True)
 
-    train_id = train_index['fall_comp'].values
-    test_id = test_index['fall_comp'].values
+    train_id = train_index['case_no'].values
+    test_id = test_index['case_no'].values
 
-    train_index = y.query('fall_comp in @train_id').index
-    test_index = y.query('fall_comp in @test_id').index
+    train_index = y.query('case_no in @train_id').index
+    test_index = y.query('case_no in @test_id').index
 
     train_index = shuffle(
         train_index,

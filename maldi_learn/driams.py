@@ -44,7 +44,7 @@ _metadata_columns = [
     'code',
     'species',
     'laboratory_species',
-    'fall_comp',
+    'case_no',
 ]
 
 
