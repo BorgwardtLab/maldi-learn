@@ -42,8 +42,9 @@ class PIKE(StationaryKernelMixin, Kernel):
         """
         self.sigma = sigma
         self.sigma_bounds = sigma_bounds
+        self.hotpatch_sklearn = hotpatch_sklearn
 
-        if hotpatch_sklearn:
+        if self.hotpatch_sklearn:
             def passthrough(*args, **kwargs):
                 return args
 
@@ -54,10 +55,15 @@ class PIKE(StationaryKernelMixin, Kernel):
 
             sys.modules['sklearn.metrics.pairwise'] = module
 
+            # Disable some additional validation checks. This is
+            # required because the classifier behaves in various 
+            # ways when being subjected to inputs of *different*
+            # lengths versus *same-length* inputs.
+            module = sys.modules['sklearn.utils.validation']
+
             # We now also disable the `_assert_all_finite` routine
             # because it currently does not handle arrays of dtype
             # object correctly.
-            module = sys.modules['sklearn.utils.validation']
             module._assert_all_finite = passthrough
 
             sys.modules['sklearn.utils.validation'] = module
