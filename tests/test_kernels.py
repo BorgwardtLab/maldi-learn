@@ -7,8 +7,6 @@ from maldi_learn.kernels import DiffusionKernel
 
 from sklearn.gaussian_process import GaussianProcessClassifier
 
-import numpy as np
-
 
 MOCK_DATA = [
     MaldiTofSpectrum(
