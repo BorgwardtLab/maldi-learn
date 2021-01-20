@@ -18,7 +18,10 @@ class PIKE(StationaryKernelMixin, Kernel):
     a MALDI-TOF spectrum.
     """
 
-    def __init__(self, sigma=1.0, sigma_bounds=(1e-5, 1e5)):
+    def __init__(self,
+                 sigma=1.0,
+                 sigma_bounds=(1e-5, 1e5),
+                 hotpatch_sklearn=True):
         """Initialise a new instance of the kernel.
 
         Parameters
@@ -30,19 +33,34 @@ class PIKE(StationaryKernelMixin, Kernel):
         sigma_bounds : tuple of floats
             Tuple specifying the minimum and maximum bound of the sigma
             scale parameter.
+
+        hotpatch_sklearn : bool
+            If set, ensures that `scikit-learn` is patched to ensure
+            that the kernel can be applied. This involves *removing*
+            a few consistency checks, so it should be treated with a
+            little bit of care.
         """
         self.sigma = sigma
         self.sigma_bounds = sigma_bounds
 
-        def passthrough(*args, **kwargs):
-            return args
+        if hotpatch_sklearn:
+            def passthrough(*args, **kwargs):
+                return args
 
-        # TODO: this is not the best way of handling the calculation,
-        # but `pairwise_distances` is making this so much easier.
-        module = sys.modules['sklearn.metrics.pairwise']
-        module.check_pairwise_arrays = passthrough
+            # TODO: this is not the best way of handling the calculation,
+            # but `pairwise_distances` is making this so much easier.
+            module = sys.modules['sklearn.metrics.pairwise']
+            module.check_pairwise_arrays = passthrough
 
-        sys.modules['sklearn.metrics.pairwise'] = module
+            sys.modules['sklearn.metrics.pairwise'] = module
+
+            # We now also disable the `_assert_all_finite` routine
+            # because it currently does not handle arrays of dtype
+            # object correctly.
+            module = sys.modules['sklearn.utils.validation']
+            module._assert_all_finite = passthrough
+
+            sys.modules['sklearn.utils.validation'] = module
 
     @property
     def hyperparameter_sigma(self):
