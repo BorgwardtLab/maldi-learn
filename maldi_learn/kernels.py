@@ -56,7 +56,7 @@ class PIKE(StationaryKernelMixin, Kernel):
             sys.modules['sklearn.metrics.pairwise'] = module
 
             # Disable some additional validation checks. This is
-            # required because the classifier behaves in various 
+            # required because the classifier behaves in various
             # ways when being subjected to inputs of *different*
             # lengths versus *same-length* inputs.
             module = sys.modules['sklearn.utils.validation']
