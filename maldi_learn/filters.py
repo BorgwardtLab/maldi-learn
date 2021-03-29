@@ -118,6 +118,3 @@ class DRIAMSSpeciesFilter:
 
 def filter_by_machine_type(row):
     return 'MALDI1' in row['code']
-
-
-
