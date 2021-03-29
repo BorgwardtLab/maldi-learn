@@ -17,6 +17,64 @@ class DRIAMSFilter:
         return result
 
 
+class DRIAMSBooleanExpressionFilter:
+    """Simple filter class for boolean expressions.
+
+    This filter can parse simple boolean expressions of the form
+    `column_name OP value`, where `OP` is either `==` or `!=` to
+    indicate equality or inequality, respectively.
+
+    `column_name` must be a valid column in the data set.
+    """
+
+    def __init__(self, expression, remove_if_met=True):
+        """Create new instance of filter.
+
+        Parameters
+        ----------
+        expression : str
+            Simple expression string as defined above.
+
+        remove_if_met : bool
+            If set, *removes* all rows that meet the filter criterion. Else,
+            *only* rows that meet the criterion are kept.
+        """
+        col, op, val = self._parse_expression(expression)
+
+        self.column = col
+        self.operator = op
+        self.value = val
+
+        self.remove_if_met = remove_if_met
+
+    def _parse_expression(self, expression):
+        """Parse expression into column, operator, and value."""
+        tokens = expression.split()
+
+        assert len(tokens) == 3, RuntimeError('Malformed expression')
+
+        col, op, val = tokens
+
+        assert op in ['==', '!='], RuntimeError('Malformed expression')
+
+        return col, op, val
+
+    def __call__(self, row):
+        """Apply filter to a row."""
+        if self.operator == '==':
+            result = row[self.column] == self.value
+        elif self.operator == '!=':
+            result = row[self.column] != self.value
+
+        # By default, returning `True` means that we want to *use* this
+        # row. We have to negate the value if we want to remove it here
+        # instead.
+        if self.remove_if_met:
+            result = not result
+
+        return result
+
+
 class DRIAMSDateRangeFilter:
     def __init__(self, date_from, date_to, date_col='acquisition_date'):
         self.date_from = dateparser.parse(date_from)
