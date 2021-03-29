@@ -33,19 +33,14 @@ class DRIAMSBooleanExpressionFilter:
         Parameters
         ----------
         expression : str
-            Simple expression string as defined above.
-
-        remove_if_met : bool
-            If set, *removes* all rows that meet the filter criterion. Else,
-            *only* rows that meet the criterion are kept.
+            Simple expression string as defined above. If the expression
+            matches, the row is kept. Else, the row is discarded.
         """
         col, op, val = self._parse_expression(expression)
 
         self.column = col
         self.operator = op
         self.value = val
-
-        self.remove_if_met = remove_if_met
 
     def _parse_expression(self, expression):
         """Parse expression into column, operator, and value."""
@@ -65,12 +60,6 @@ class DRIAMSBooleanExpressionFilter:
             result = row[self.column] == self.value
         elif self.operator == '!=':
             result = row[self.column] != self.value
-
-        # By default, returning `True` means that we want to *use* this
-        # row. We have to negate the value if we want to remove it here
-        # instead.
-        if self.remove_if_met:
-            result = not result
 
         return result
 
