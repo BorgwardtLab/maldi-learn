@@ -24,6 +24,9 @@ def case_based_stratification(
     random_state=123,
 ):
     """Stratify while taking patient case information into account."""
+    # Ensuring proper cast to ensure that we can always perform mean
+    # aggregation later on.
+    y[antibiotic] = y[antibiotic].astype(float)
     unique_groups = y.groupby('case_no').aggregate(
         {
             antibiotic: 'mean',
@@ -53,19 +56,51 @@ def case_based_stratification(
     train_index.reset_index(inplace=True)
     test_index.reset_index(inplace=True)
 
+    # Get original case numbers belonging to each unique group. We need
+    # to *expand* these groups subsequently.
     train_id = train_index['case_no'].values
     test_id = test_index['case_no'].values
 
-    train_index = y.query('case_no in @train_id').index
-    test_index = y.query('case_no in @test_id').index
+    # Create a column that contains the unique labels of the train and
+    # test data points, respectively. There are multiple ways to solve
+    # this but this one requires no additional data frame.
 
-    train_index = shuffle(
-        train_index,
+    case_to_label = {}
+
+    for ids, labels in zip([train_id, test_id], [train_labels, test_labels]):
+        case_to_label.update({
+            id_: label.tolist() for id_, label in zip(ids, labels)
+         })
+
+    # Auxiliary function to assign a label to a row. Since we might not
+    # have labels for all cases available, we have to return a fake one
+    # instead. Such labels will never be used for train/test, though.
+    def get_label(row):
+        case_no = row['case_no']
+        if case_no in case_to_label:
+            return case_to_label[case_no]
+        else:
+            return [-1, -1]
+
+    y['unique_label'] = y.apply(get_label, axis=1)
+
+    # The queries serve to expand the data points again. Everything that
+    # belongs to the same case number will now be either assigned to the
+    # train part or the test portion.
+
+    train_index = y.query('case_no in @train_id').index
+    train_labels = y.query('case_no in @train_id').unique_label
+
+    test_index = y.query('case_no in @test_id').index
+    test_labels = y.query('case_no in @test_id').unique_label
+
+    train_index, train_labels = shuffle(
+        train_index, train_labels,
         random_state=random_state
     )
 
-    test_index = shuffle(
-        test_index,
+    test_index, test_labels = shuffle(
+        test_index, test_labels,
         random_state=random_state
     )
 
