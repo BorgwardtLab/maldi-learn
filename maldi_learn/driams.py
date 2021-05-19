@@ -105,26 +105,33 @@ def _check_id_file(id_file):
     `True` if the ID file is valid, else `False`.
     """
     if not os.path.exists(id_file):
+        warnings.warn(f'File {id_file} not found. This will cause an error.')
         return False
 
     try:
         df = pd.read_csv(id_file, low_memory=False)
 
         if 'code' not in df.columns or 'species' not in df.columns:
+            warnings.warn('Either "code" column or "species" column '
+                          'is missing.')
             return False
 
         if df['code'].empty or df['code'].isna().sum() != 0:
+            warnings.warn('Either "code" column is empty or it contains '
+                          'NaN values.')
             return False
 
         # Species information is allowed to be missing; while some of
         # these samples cannot be readily used for classification, it
         # it possible that another type of analysis might use them.
         if df['species'].empty:
+            warnings.warn('"Species" column is empty.')
             return False
 
     # Any exception will make sure that this ID file is *not* valid; we
     # are not sure which exception to expect here.
-    except Exception:
+    except Exception as e:
+        warnings.warn(f'Caught the following exception: {e}')
         return False
 
     # If we made it this far, the file is sufficiently well-formed
