@@ -20,7 +20,8 @@ def case_based_stratification(
     y,
     antibiotic,
     test_size=0.20,
-    random_state=123
+    return_stratification=False,
+    random_state=123,
 ):
     """Stratify while taking patient case information into account."""
     unique_groups = y.groupby('case_no').aggregate(
@@ -33,12 +34,16 @@ def case_based_stratification(
 
     y = y.reset_index(drop=True)
 
-    train_index, test_index = stratify_by_species_and_label(
-        unique_groups,
-        antibiotic=antibiotic,
-        test_size=test_size,
-        random_state=random_state,
-    )
+    # By default, we always use the returned stratification here, making
+    # it possible to use it later on.
+    train_index, test_index, train_labels, test_labels = \
+        stratify_by_species_and_label(
+            unique_groups,
+            antibiotic=antibiotic,
+            test_size=test_size,
+            random_state=random_state,
+            return_stratification=True,
+        )
 
     train_index = unique_groups.iloc[train_index]
     test_index = unique_groups.iloc[test_index]
@@ -64,7 +69,10 @@ def case_based_stratification(
         random_state=random_state
     )
 
-    return train_index, test_index
+    if return_stratification:
+        return train_index, test_index, train_labels, test_labels
+    else:
+        return train_index, test_index
 
 
 def stratify_by_species_and_label(
