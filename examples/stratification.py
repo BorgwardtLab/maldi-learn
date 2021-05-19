@@ -8,6 +8,7 @@ from maldi_learn.driams import DRIAMSDatasetExplorer
 from maldi_learn.driams import DRIAMSLabelEncoder
 from maldi_learn.driams import load_driams_dataset
 
+from maldi_learn.utilities import case_based_stratification
 from maldi_learn.utilities import stratify_by_species_and_label
 
 
@@ -68,16 +69,17 @@ logging.info('Loading data set')
 driams_dataset = load_driams_dataset(
             explorer.root,
             'DRIAMS-A',
-            ['2015', '2016', '2017', '2018'],
+            '*',
             '*',
             antibiotics=antibiotics,
-            encoder=DRIAMSLabelEncoder(),
             handle_missing_resistance_measurements='remove_if_all_missing',
             nrows=500,
+            id_suffix='strat',
+            spectra_type='binned_6000',
+
 )
 
 logging.info('Finished loading data set')
-
 
 for antibiotic in antibiotics:
 
@@ -109,3 +111,13 @@ for antibiotic in antibiotics:
     assert (test_labels_1 == test_labels_2).all()
 
     logging.info('Finished second stratification')
+
+    train_index_3, test_index_3, train_labels_3, test_labels_3 = \
+        case_based_stratification(
+            driams_dataset.y, antibiotic=antibiotic,
+            test_size=0.20,
+            return_stratification=True,
+        )
+
+    assert (len(train_index_3) == len(train_labels_3))
+    assert (len(test_index_3) == len(test_labels_3))
