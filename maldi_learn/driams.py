@@ -4,6 +4,7 @@ This is the main module for the DRIAMS data set. It contains general
 exploration classes and loaders.
 """
 
+import collections
 import dotenv
 import hashlib
 import os
@@ -652,7 +653,7 @@ def _load_metadata(
     """
     # Ensures that we always get a list of antibiotics for subsequent
     # processing.
-    if type(antibiotics) is not list:
+    if not isinstance(antibiotics, collections.abc.Sequence):
         antibiotics = [antibiotics]
 
     assert handle_missing_resistance_measurements in [
