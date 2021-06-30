@@ -653,7 +653,8 @@ def _load_metadata(
     """
     # Ensures that we always get a list of antibiotics for subsequent
     # processing.
-    if not isinstance(antibiotics, collections.abc.Sequence):
+    if (not isinstance(antibiotics, collections.abc.Sequence) or
+            isinstance(antibiotics, str)):
         antibiotics = [antibiotics]
 
     assert handle_missing_resistance_measurements in [
