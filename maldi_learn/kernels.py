@@ -165,7 +165,7 @@ class PIKE(StationaryKernelMixin, Kernel):
 
             # Sum over all pairwise kernel values to get the full
             # gradient between the two entries.
-            return np.sum(K_gradient) / (4 * self.sigma**2)
+            return np.sum(K_gradient) / (8 * self.sigma**2)
 
         if Y is None:
             if eval_gradient:
