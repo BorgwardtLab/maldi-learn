@@ -36,6 +36,11 @@ $ pyenv local 3.7.4    # Mark python version 3.7.4 for usage in this folder
 $ poetry install       # Setup the virtual environment for development
 ```
 
+## Getting the data
+
+Download the data from [DOI: 10.5061/dryad.bzkh1899q](https://doi.org/10.5061/dryad.bzkh1899q) and extract
+all files into one shared directory, which we will refer to as the root data directory.
+
 ## Examples
 
 The folder `examples` contains scripts that demonstrate a part of the
