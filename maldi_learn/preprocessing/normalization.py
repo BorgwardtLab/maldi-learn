@@ -119,7 +119,7 @@ class StandardScaleNormalizer(BaseEstimator, TransformerMixin):
         self.mean = np.mean(np.array(l), axis=0)
         self.std = np.std(np.array(l), axis=0)
         # Set standard deviation to None for bins with zero variance
-        self.std[self.std == 0] = None
+        self.std[self.std == 0] = np.nan
         return self
 
     def transform(self, X):
