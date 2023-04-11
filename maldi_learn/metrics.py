@@ -72,7 +72,7 @@ def vme_curve(y_true, y_pred, pos_label=1, sample_weight=None):
                                              sample_weight=sample_weight)
 
     vme = fps / fps[-1]
-    me = (tps[-1] - tps) / tps[-1]
+    me = 1 - tps / tps[-1]
     return vme, 1-me, thresholds
 
 
