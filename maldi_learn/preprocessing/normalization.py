@@ -106,7 +106,7 @@ class StandardScaleNormalizer(BaseEstimator, TransformerMixin):
     """
     def _normalize_spectrum(self, spectrum):
         spectrum_scaled = spectrum.copy()
-        if self.std is not None:
+        if self.std is not np.nan:
             # Avoid division by zero error when standard deviation is zero
             spectrum_scaled[:, 1] = (spectrum.intensities - self.mean) / self.std
         else:
