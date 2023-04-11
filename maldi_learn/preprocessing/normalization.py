@@ -105,17 +105,22 @@ class StandardScaleNormalizer(BaseEstimator, TransformerMixin):
     and a standard deviation of one.
     """
     def _normalize_spectrum(self, spectrum):
-        spectrum_scaled  = spectrum.copy()
-        spectrum_scaled[:,1] = (spectrum.intensities - self.mean) / self.std
+        spectrum_scaled = spectrum.copy()
+        if self.std is not None:
+            # Avoid division by zero error when standard deviation is zero
+            spectrum_scaled[:, 1] = (spectrum.intensities - self.mean) / self.std
+        else:
+            # Set all intensities to zero for spectra with zero variance
+            spectrum_scaled[:, 1] = 0.0
         return spectrum_scaled
 
     def fit(self, X):
         l = [s.intensities for s in X]
         self.mean = np.mean(np.array(l), axis=0)
         self.std = np.std(np.array(l), axis=0)
+        # Set standard deviation to None for bins with zero variance
+        self.std[self.std == 0] = None
         return self
 
     def transform(self, X):
-        return [
-            self._normalize_spectrum(spectrum) for spectrum in X
-        ]
+        return [self._normalize_spectrum(spectrum) for spectrum in X]
