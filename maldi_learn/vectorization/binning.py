@@ -41,13 +41,14 @@ class BinningVectorizer(BaseEstimator, TransformerMixin):
 
     def fit(self, X, y=None):
         """Fit transformer, derives bins used to bin spectra."""
-        combined_times = np.concatenate(
-            [spectrum[:, 0] for spectrum in X], axis=0)
-        min_range = min(self.min_bin, np.min(combined_times))
-        max_range = max(self.max_bin, np.max(combined_times))
-
-        _, self.bin_edges_ = np.histogram(
-            combined_times, self.n_bins, range=(min_range, max_range))
+        # Find the smallest and largest time values in the dataset
+        # It should be that the first/last time value is the smallest/biggest
+        # but we call min/max to be safe.
+        min_range = min(spectrum[:, 0].min() for spectrum in X)
+        min_range = min(min_range, self.min_bin)
+        max_range = max(spectrum[:, 0].max() for spectrum in X)
+        max_range = max(max_range, self.max_bin)
+        self.bin_edges_ = np.linspace(min_range, max_range, self.n_bins + 1)
         return self
 
     def transform(self, X):
