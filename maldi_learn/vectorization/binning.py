@@ -72,19 +72,10 @@ class BinningVectorizer(BaseEstimator, TransformerMixin):
 
     def _transform(self, spectrum):
         times = spectrum[:, 0]
-        indices = np.digitize(times, self.bin_edges_, right=True)
 
-        # Drops all instances which are outside the defined bin
-        # range.
-        valid = (indices >= 1) & (indices <= self.n_bins)
+        valid = (times > self.bin_edges_[0]) & (times <= self.bin_edges_[-1])
         spectrum = spectrum[valid]
 
-        # Need to update indices to ensure that the first bin is at
-        # position zero.
-        indices = indices[valid] - 1
-        identity = np.eye(self.n_bins)
-
-        vec = np.sum(
-            identity[indices] * spectrum[:, 1][:, np.newaxis], axis=0)
+        vec = np.histogram(spectrum[:, 0], bins=self.bin_edges_, weights=spectrum[:, 1])[0]
 
         return vec
